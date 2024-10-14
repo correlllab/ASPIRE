@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm",]
+requires = ["setuptools>=61.0", "setuptools-scm>=8.0",]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -24,13 +24,10 @@ dependencies = [
 ]
 
 [project.scripts]
-build_FD = "setup.setup:build_FD"
-
-[tool.setuptools]
-py-modules = ['aspire']
+buildfd = "aspire.__build__:build_FD"
 
 [tool.setuptools.package-data]
-downward = ['downward/*']
+aspire = ['pddlstream/downward/**/*']
 
 [project.urls]
 Homepage = "https://github.com/correlllab/ASPIRE"
