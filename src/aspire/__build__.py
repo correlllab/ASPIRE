@@ -20,3 +20,6 @@ def build_FD():
     errcode = process.wait()
     print( f"\nInstalled FastDownward!\nExited with code: {errcode}\n" )
 
+if __name__ == "__main__":
+    build_FD()
+
