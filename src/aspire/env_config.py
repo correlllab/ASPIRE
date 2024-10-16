@@ -1,103 +1,114 @@
 ########## INIT ####################################################################################
-import os, ast
+import os, json
 import numpy as np
-# import pybullet_data
 
 
 
 ########## SETTINGS ################################################################################
 
+def env_sto( varKey, varVal ):
+    """ Serialize and save the env var """
+    os.environ[ varKey ] = json.dumps( varVal )
+
+
+def env_var( varKey ):
+    """ Load and parse the env var """
+    try:
+        return json.loads( os.environ[ varKey ] )
+    except KeyError:
+        print( f"There was no {varKey} in the environment!" )
+        return None
+    except json.JSONDecodeError:
+        print( f"Bad data stored at {varKey}! Cannot decode!" )
+        return None
+
+
 def set_global_env():
+    """ Non-specific options """
     np.set_printoptions(
         edgeitems =  16, # Number of items before ...
         linewidth = 200, 
         formatter = dict( float = lambda x: "%.5g" % x ) 
     )
+    env_sto( "_VERBOSE", True )
 
-    # ROBOT_URDF_PATH = os.path.expanduser( "~/MAGPIE/090_pdls_responsive/ur_e_description/urdf/ur5e.urdf" )
-    # TABLE_URDF_PATH = os.path.join( pybullet_data.getDataPath(), "table/table.urdf" )
-    os.environ["_VERBOSE"] = "True"
 
-def get_env_var( varKey ):
-    try:
-        varStr = os.environ[ varKey ]
-        verLit = ast.literal_eval( varStr )
-        # FIXME: ARRAYIFY APPROPRIATE LISTS
-        return verLit 
-    except KeyError:
-        print( f"There was no {varKey} in the environment" )
-        return None
 
 ########## GRAPHICS ################################################################################
 
 def set_grahpics_env():
-    os.environ["_USE_GRAPHICS"]   = "False"
-    os.environ["_RECORD_SYM_SEQ"] = "True"
-    os.environ["_BLOCK_ALPHA"]  = "1.0"
-    os.environ["_CLR_TABLE"]  = """{
+    """ Graphical Debugging Options """
+    env_sto( "_USE_GRAPHICS", False ) 
+    env_sto( "_RECORD_SYM_SEQ", True )
+    env_sto( "_BLOCK_ALPHA", 1.0 )
+    env_sto( "_CLR_TABLE", {
         'red': [1.0, 0.0, 0.0,],
         'ylw': [1.0, 1.0, 0.0,],
         'blu': [0.0, 0.0, 1.0,],
         'grn': [0.0, 1.0, 0.0,],
         'orn': [1.0, 0.5, 0.0,],
         'vio': [0.5, 0.0, 1.0,]
-    }"""
+    } )
 
 
 
 ########## OBJECTS #################################################################################
 
 def set_object_env():
-    os.environ["_NULL_NAME"]       = "NOTHING"
+    """ Object Names and Scales """
+    env_sto( "_NULL_NAME", "NOTHING" ) 
+    env_sto( "_ONLY_RED", False ) 
+    env_sto( "_ONLY_PRIMARY", False ) 
+    env_sto( "_ONLY_SECONDARY", False ) 
+    env_sto( "_ONLY_EXPERIMENT", True ) 
 
-    os.environ["_ONLY_RED"]        = "False"
-    os.environ["_ONLY_PRIMARY"]    = "False"
-    os.environ["_ONLY_SECONDARY"]  = "False"
-    os.environ["_ONLY_EXPERIMENT"] = "True"
-
-    if os.environ["_ONLY_RED"]:
-        os.environ["_BLOCK_NAMES"] = f"['redBlock', {os.environ["_NULL_NAME"]}]"
-    elif os.environ["_ONLY_PRIMARY"]:
-        os.environ["_BLOCK_NAMES"]  = f"['redBlock', 'ylwBlock', 'bluBlock', {os.environ["_NULL_NAME"]},]"
-    elif os.environ["_ONLY_SECONDARY"]:
-        os.environ["_BLOCK_NAMES"]  = f"['grnBlock', 'ornBlock', 'vioBlock', {os.environ["_NULL_NAME"]},]"
-    elif os.environ["_ONLY_EXPERIMENT"]:
-        os.environ["_BLOCK_NAMES"] = f"['grnBlock', 'bluBlock', 'ylwBlock', {os.environ["_NULL_NAME"]},]"
+    if env_var("_ONLY_RED"):
+        env_sto( "_BLOCK_NAMES", ['redBlock', env_var("_NULL_NAME")] ) 
+    elif env_var("_ONLY_PRIMARY"):
+        env_sto( "_BLOCK_NAMES", ['redBlock', 'ylwBlock', 'bluBlock', env_var("_NULL_NAME"),] )
+    elif env_var("_ONLY_SECONDARY"):
+        env_sto( "_BLOCK_NAMES", ['grnBlock', 'ornBlock', 'vioBlock', env_var("_NULL_NAME"),] ) 
+    elif env_var("_ONLY_EXPERIMENT"):
+        env_sto( "_BLOCK_NAMES", ['grnBlock', 'bluBlock', 'ylwBlock', env_var("_NULL_NAME"),] )
     else:
-        os.environ["_BLOCK_NAMES"] = f"['redBlock', 'ylwBlock', 'bluBlock', 'grnBlock', 'ornBlock', 'vioBlock', {os.environ["_NULL_NAME"]},]"
+        env_sto( "_BLOCK_NAMES", ['redBlock', 'ylwBlock', 'bluBlock', 'grnBlock', 'ornBlock', 'vioBlock', env_var("_NULL_NAME"),] )
 
+    env_sto( "_POSE_DIM", 7 ) 
+    env_sto( "_ACTUAL_NAMES", env_var( "_BLOCK_NAMES" )[:-1] ) 
+    env_sto( "_N_CLASSES", len( env_var("_BLOCK_NAMES" )) ) 
+    env_sto( "_N_ACTUAL", len( env_var("_ACTUAL_NAMES" )) ) 
 
-    os.environ["_POSE_DIM"]     = "7"
-    os.environ["_ACTUAL_NAMES"] = get_env_var( "_BLOCK_NAMES" )[:-1] 
-    os.environ["_N_CLASSES"]    = len( get_env_var( "_BLOCK_NAMES" ) )
-    os.environ["_N_ACTUAL"]     = len( get_env_var( "_BLOCK_NAMES" ) )
+    env_sto( "_BLOCK_SCALE", 0.025 ) # Medium Wooden Blocks (YCB)
+    # env_sto( "_BLOCK_SCALE", 0.040 ) # 3D Printed Blocks
 
-    os.environ["_BLOCK_SCALE"]  = "0.025" # Medium Wooden Blocks (YCB)
-    # _BLOCK_SCALE  = 0.040 # 3D Printed Blocks
-
-    os.environ["_ACCEPT_POSN_ERR"] = 0.55*get_env_var( "_BLOCK_SCALE" ) # 0.50 # 0.65 # 0.75 # 0.85 # 1.00
-    os.environ["_Z_SAFE"]          = 0.400
-    os.environ["_MIN_SEP"]         = 0.85*get_env_var( "_BLOCK_SCALE" ) # 0.40 # 0.60 # 0.70 # 0.75
-
-    os.environ["_SPACE_EXPAND"] =  "0.100"
-    os.environ["_MIN_X_OFFSET"] = -0.380 - get_env_var( "_SPACE_EXPAND" )
-    os.environ["_MAX_X_OFFSET"] = -0.060 + get_env_var( "_SPACE_EXPAND" )
-    os.environ["_MIN_Y_OFFSET"] = -0.614 - get_env_var( "_SPACE_EXPAND" )
-    os.environ["_MAX_Y_OFFSET"] = -0.290 + get_env_var( "_SPACE_EXPAND" )
-    os.environ["_MAX_Z_BOUND"]  = get_env_var( "_BLOCK_SCALE" )*4.0
-    os.environ["_X_WRK_SPAN"] = get_env_var( "_MAX_X_OFFSET" ) - get_env_var( "_MIN_X_OFFSET" )
-    os.environ["_Y_WRK_SPAN"] = get_env_var( "_MAX_Y_OFFSET" ) - get_env_var( "_MIN_Y_OFFSET" )
+    env_sto( "_ACCEPT_POSN_ERR", 0.55*env_var( "_BLOCK_SCALE" ) ) # 0.50 # 0.65 # 0.75 # 0.85 # 1.00
+    env_sto( "_Z_SAFE", 0.400 )
+    env_sto( "_MIN_SEP", 0.85*env_var( "_BLOCK_SCALE" ) ) # 0.40 # 0.60 # 0.70 # 0.75
 
 
 
 ########## ROBOT ###################################################################################
 
+def set_workspace_env():
+    """ Set working envelope """
+    env_sto( "_SPACE_EXPAND",  0.100 ) 
+    env_sto( "_MIN_X_OFFSET", -0.380 - env_var( "_SPACE_EXPAND" ) )
+    env_sto( "_MAX_X_OFFSET", -0.060 + env_var( "_SPACE_EXPAND" ) )
+    env_sto( "_MIN_Y_OFFSET", -0.614 - env_var( "_SPACE_EXPAND" ) )
+    env_sto( "_MAX_Y_OFFSET", -0.290 + env_var( "_SPACE_EXPAND" ) )
+    env_sto( "_MAX_Z_BOUND", env_var( "_BLOCK_SCALE" )*4.0 )
+    env_sto( "_X_WRK_SPAN", env_var( "_MAX_X_OFFSET" ) - env_var( "_MIN_X_OFFSET" ) )
+    env_sto( "_Y_WRK_SPAN", env_var( "_MAX_Y_OFFSET" ) - env_var( "_MIN_Y_OFFSET" ) )
+
+
 def set_robot_env():
-    os.environ["_ROBOT_FREE_SPEED"]   =  "0.125"
-    os.environ["_ROBOT_HOLD_SPEED"]   =  "0.125"
-    os.environ["_MOVE_COOLDOWN_S"]    =  "0.5"
-    os.environ["_BT_UPDATE_HZ"]       = "10.0"
-    os.environ["_BT_ACT_TIMEOUT_S"]   = "20.0"
+    """ Set robot working parameters for this problem """
+    set_workspace_env()
+    env_sto( "_ROBOT_FREE_SPEED",  0.125 ) 
+    env_sto( "_ROBOT_HOLD_SPEED",  0.125 )
+    env_sto( "_MOVE_COOLDOWN_S",  0.5 )
+    env_sto( "_BT_UPDATE_HZ",  10.0 )
+    env_sto( "_BT_ACT_TIMEOUT_S",  20.0 )
 
 
 
@@ -105,15 +116,18 @@ def set_robot_env():
 ########## CAMERA ##################################################################################
 
 def set_camera_env():
-    os.environ["_D405_FOV_H_DEG"]     = "84.0"
-    os.environ["_D405_FOV_V_DEG"]     = "58.0"
-    os.environ["_D405_FOV_D_M"]       =  "0.920"
-    os.environ["_MIN_CAM_PCD_DIST_M"] = 0.075 + get_env_var( "_BLOCK_SCALE" ) * len( get_env_var( "_ACTUAL_NAMES" ) )
+    """ Set camera view params """
+    env_sto( "_D405_FOV_H_DEG",  84.0 )
+    env_sto( "_D405_FOV_V_DEG",  58.0 )
+    env_sto( "_D405_FOV_D_M",  0.920 )
+    env_sto( "_MIN_CAM_PCD_DIST_M", 0.075 + env_var( "_BLOCK_SCALE" ) * len( env_var( "_ACTUAL_NAMES" ) ) )
 
 
 
-########## >>>>> TOTAL <<<<< #######################################################################
-def set_total_env():
+########## >>>>> BLOCKS <<<<< ######################################################################
+
+def set_blocks_env():
+    """ Store all params for the blocks problem """
     set_global_env()
     set_object_env()
     set_robot_env()
