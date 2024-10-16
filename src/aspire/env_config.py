@@ -20,8 +20,10 @@ def set_global_env():
 
 def get_env_var( varKey ):
     try:
-        varStr = os.environ["_VERBOSE"]
-        return ast.literal_eval( varStr )
+        varStr = os.environ[ varKey ]
+        verLit = ast.literal_eval( varStr )
+        # FIXME: ARRAYIFY APPROPRIATE LISTS
+        return verLit 
     except KeyError:
         print( f"There was no {varKey} in the environment" )
         return None
