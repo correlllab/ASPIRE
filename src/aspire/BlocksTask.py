@@ -4,15 +4,18 @@ from random import random
 
 import numpy as np
 
-from env_config import ( _BLOCK_SCALE, _MIN_X_OFFSET, _MIN_Y_OFFSET, _X_WRK_SPAN, _Y_WRK_SPAN,)
 from magpie.poses import repair_pose
 
+from aspire.env_config import set_total_env
+
+set_total_env()
 
 _poseGrn = np.eye(4)
-_poseGrn[0:3,3] = [ _MIN_X_OFFSET+_X_WRK_SPAN/2.0, _MIN_Y_OFFSET+_Y_WRK_SPAN/2.0, 0.5*_BLOCK_SCALE, ]
+_poseGrn[0:3,3] = [ os.environ["_MIN_X_OFFSET"] +os.environ["_X_WRK_SPAN"]/2.0, os.environ["_MIN_Y_OFFSET"]+os.environ["_Y_WRK_SPAN"]/2.0, 0.5*os.environ["_BLOCK_SCALE"], ]
 
 from symbols import ObjPose, extract_pose_as_homog, euclidean_distance_between_symbols
 from utils import diff_norm
+
 
 
 ########## ENVIRONMENT #############################################################################

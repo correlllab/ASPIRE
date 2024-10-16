@@ -19,7 +19,7 @@ from py_trees.composites import Sequence
 ### Local ###
 from magpie.poses import translation_diff, vec_unit
 from magpie.BT import Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK
-from symbols import extract_pose_as_homog
+from aspire.symbols import extract_pose_as_homog
 
 
 
