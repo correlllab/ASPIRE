@@ -6,43 +6,46 @@ import numpy as np
 
 from magpie.poses import repair_pose
 
-from aspire.env_config import set_total_env
+from aspire.env_config import set_blocks_env, env_var, env_sto
 
-set_total_env()
+set_blocks_env()
 
 _poseGrn = np.eye(4)
-_poseGrn[0:3,3] = [ os.environ["_MIN_X_OFFSET"] +os.environ["_X_WRK_SPAN"]/2.0, os.environ["_MIN_Y_OFFSET"]+os.environ["_Y_WRK_SPAN"]/2.0, 0.5*os.environ["_BLOCK_SCALE"], ]
+_poseGrn[0:3,3] = [ env_var("_MIN_X_OFFSET") +env_var("_X_WRK_SPAN")/2.0, env_var("_MIN_Y_OFFSET")+env_var("_Y_WRK_SPAN")/2.0, 0.5*env_var("_BLOCK_SCALE"), ]
 
-from symbols import ObjPose, extract_pose_as_homog, euclidean_distance_between_symbols
-from utils import diff_norm
+from aspire.symbols import ObjPose, extract_pose_as_homog, euclidean_distance_between_symbols
+from aspire.utils import diff_norm
 
 
 
 ########## ENVIRONMENT #############################################################################
 
-def set_block_env():
-    os.environ["_trgtGrn"] = ObjPose( _poseGrn )
+def set_block_poses_env():
+    """ Hard-coded poses for the blocks problem """
+
+    env_sto( "_trgtGrn", ObjPose( _poseGrn ) ) 
+    env_sto( "_N_XTRA_SPOTS", 3 ) 
 
 
-    os.environ["_temp_home"] = np.array( [[-1.000e+00, -1.190e-04,  2.634e-05, -2.540e-01],
-                            [-1.190e-04,  1.000e+00, -9.598e-06, -4.811e-01],
-                            [-2.634e-05, -9.601e-06, -1.000e+00,  4.022e-01],
-                            [ 0.000e+00,  0.000e+00,  0.000e+00,  1.000e+00],] )
+    env_sto( "_temp_home", np.array( [[-1.000e+00, -1.190e-04,  2.634e-05, -2.540e-01],
+                                      [-1.190e-04,  1.000e+00, -9.598e-06, -4.811e-01],
+                                      [-2.634e-05, -9.601e-06, -1.000e+00,  4.022e-01],
+                                      [ 0.000e+00,  0.000e+00,  0.000e+00,  1.000e+00],] ) )
 
-    os.environ["_GOOD_VIEW_POSE"] = repair_pose( np.array( [[-0.749, -0.513,  0.419, -0.428,],
-                                            [-0.663,  0.591, -0.46 , -0.273,],
-                                            [-0.012, -0.622, -0.783,  0.337,],
-                                            [ 0.   ,  0.   ,  0.   ,  1.   ,],] ) )
+    env_sto( "_GOOD_VIEW_POSE", repair_pose( np.array( [[-0.749, -0.513,  0.419, -0.428,],
+                                                        [-0.663,  0.591, -0.46 , -0.273,],
+                                                        [-0.012, -0.622, -0.783,  0.337,],
+                                                        [ 0.   ,  0.   ,  0.   ,  1.   ,],] ) ) )
 
-    os.environ["_HIGH_VIEW_POSE"] = repair_pose( np.array( [[-0.709, -0.455,  0.539, -0.51 ],
-                                            [-0.705,  0.442, -0.554, -0.194],
-                                            [ 0.014, -0.773, -0.635,  0.332],
-                                            [ 0.   ,  0.   ,  0.   ,  1.   ],] ) )
+    env_sto( "_HIGH_VIEW_POSE", repair_pose( np.array( [[-0.709, -0.455,  0.539, -0.51 ],
+                                                        [-0.705,  0.442, -0.554, -0.194],
+                                                        [ 0.014, -0.773, -0.635,  0.332],
+                                                        [ 0.   ,  0.   ,  0.   ,  1.   ],] ) ) )
 
-    os.environ["_HIGH_TWO_POSE"] = repair_pose( np.array( [[-0.351, -0.552,  0.756, -0.552],
-                                            [-0.936,  0.194, -0.293, -0.372],
-                                            [ 0.015, -0.811, -0.585,  0.283],
-                                            [ 0.   ,  0.   ,  0.   ,  1.   ],] ) )
+    env_sto( "_HIGH_TWO_POSE", repair_pose( np.array( [[-0.351, -0.552,  0.756, -0.552],
+                                                       [-0.936,  0.194, -0.293, -0.372],
+                                                       [ 0.015, -0.811, -0.585,  0.283],
+                                                       [ 0.   ,  0.   ,  0.   ,  1.   ],] ) ) )
 
 
 ########## HELPER FUNCTIONS ########################################################################
@@ -52,9 +55,9 @@ def rand_table_pose():
     """ Return a random pose in the direct viscinity if the robot """
     rtnPose = np.eye(4)
     rtnPose[0:3,3] = [ 
-        os.environ["_MIN_X_OFFSET"] + 0.5*os.environ["_X_WRK_SPAN"] + 0.5*os.environ["_X_WRK_SPAN"]*random(), 
-        os.environ["_MIN_Y_OFFSET"] + 0.5*os.environ["_Y_WRK_SPAN"] + 0.5*os.environ["_Y_WRK_SPAN"]*random(), 
-        os.environ["_BLOCK_SCALE"]/2.0,
+        env_var("_MIN_X_OFFSET") + 0.5*env_var("_X_WRK_SPAN") + 0.5*env_var("_X_WRK_SPAN")*random(), 
+        env_var("_MIN_Y_OFFSET") + 0.5*env_var("_Y_WRK_SPAN") + 0.5*env_var("_Y_WRK_SPAN")*random(), 
+        env_var("_BLOCK_SCALE")/2.0,
     ]
     return rtnPose
 
@@ -84,7 +87,7 @@ class BlockFunctions:
             for sym in self.planner.symbols:
                 if sym.label == objcName:
                     upPose = extract_pose_as_homog( sym )
-                    upPose[2,3] += os.environ["_BLOCK_SCALE"]
+                    upPose[2,3] += env_var("_BLOCK_SCALE")
 
                     rtnPose = self.planner.get_grounded_fact_pose_or_new( upPose )
                     print( f"FOUND a pose {rtnPose} supported by {objcName}!" )
@@ -198,7 +201,7 @@ class BlockFunctions:
         return rtnFacts
     
 
-    def allocate_table_swap_space( self, Nspots = os.environ["_N_XTRA_SPOTS"] ):
+    def allocate_table_swap_space( self, Nspots = env_var("_N_XTRA_SPOTS") ):
         """ Find some open poses on the table for performing necessary swaps """
         rtnFacts  = []
         freeSpots = []
@@ -208,7 +211,7 @@ class BlockFunctions:
             print( f"\t\tSample: {nuPose}" )
             collide = False
             for spot in occuSpots:
-                if euclidean_distance_between_symbols( spot, nuPose ) < ( os.environ["_MIN_SEP"] ):
+                if euclidean_distance_between_symbols( spot, nuPose ) < ( env_var("_MIN_SEP") ):
                     collide = True
                     break
             if not collide:

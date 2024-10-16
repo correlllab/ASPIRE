@@ -1,3 +1,4 @@
 [submodule "src/aspire/pddlstream"]
 	path = src/aspire/pddlstream
 	url = git@github.com:correlllab/pddlstream.git
+	branch = ASPIRE
