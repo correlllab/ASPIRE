@@ -201,8 +201,10 @@ class BlockFunctions:
         return rtnFacts
     
 
-    def allocate_table_swap_space( self, Nspots = env_var("_N_XTRA_SPOTS") ):
+    def allocate_table_swap_space( self, Nspots = None ):
         """ Find some open poses on the table for performing necessary swaps """
+        if Nspots is None:
+            Nspots = env_var("_N_XTRA_SPOTS")
         rtnFacts  = []
         freeSpots = []
         occuSpots = [extract_pose_as_homog( sym ) for sym in self.planner.symbols]
