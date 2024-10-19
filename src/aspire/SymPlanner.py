@@ -17,52 +17,28 @@ from random import random
 from traceback import print_exc, format_exc
 from datetime import datetime
 
-
-
 ### Special ###
 import numpy as np
 from py_trees.common import Status
-from magpie.BT import Open_Gripper
-from magpie import ur5 as ur5
 
-### Local ###
-from symbols import ( ObjPose, extract_pose_as_homog, euclidean_distance_between_symbols )
-from utils import ( DataLogger, )
-from actions import ( display_PDLS_plan, get_BT_plan, BT_Runner, MoveFree, GroundedAction, 
-                      Interleaved_MoveFree_and_PerceiveScene, )
+### ASPIRE ###
+from aspire.symbols import ( ObjPose, GraspObj, extract_pose_as_homog, euclidean_distance_between_symbols )
+from aspire.actions import ( display_PDLS_plan, get_BT_plan, BT_Runner, MoveFree, GroundedAction, 
+                             Interleaved_MoveFree_and_PerceiveScene, )
 
-### PDDLStream ### 
-sys.path.append( "../../pddlstream/" )
-from pddlstream.utils import read, INF, get_file_path
-from pddlstream.language.generator import from_gen_fn, from_test
-from pddlstream.language.constants import print_solution, PDDLProblem
-from pddlstream.algorithms.meta import solve
+### ASPIRE::PDDLStream ### 
+from aspire.pddlstream.pddlstream.utils import read, INF, get_file_path
+from aspire.pddlstream.pddlstream.language.generator import from_gen_fn, from_test
+from aspire.pddlstream.pddlstream.language.constants import print_solution, PDDLProblem
+from aspire.pddlstream.pddlstream.algorithms.meta import solve
 
 
 
 
 ##### Planner #############################################################
 
-class TaskPlanner:
+class SymPlanner:
     """ Basic task planning loop """
-
-    ##### File Ops ########################################################
-
-    def open_file( self ):
-        """ Set the name of the current file """
-        dateStr     = datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
-        self.outNam = f"Task-Planner_{dateStr}.txt"
-        self.outFil = open( os.path.join( self.outDir, self.outNam ), 'w' )
-
-
-    def dump_to_file( self, openNext = False ):
-        """ Write all data lines to a file """
-        self.outFil.writelines( [f"{str(line)}\n" for line in self.datLin] )
-        self.outFil.close()
-        if openNext:
-            self.datLin = list()
-            self.open_file()
-
 
     ##### Init ############################################################
 
@@ -78,31 +54,15 @@ class TaskPlanner:
         self.task   = None # --------- Current task definition
         self.goal   = tuple() # ------ Current goal specification
         self.grasp  = list() # ------- ? NOT USED ?
-        self.datLin = list() # ------- Data to write
-        self.outDir = "data/"
-        self.open_file()
 
 
-    def __init__( self, noViz = False, noBot = False ):
+    def __init__( self ):
         """ Create a pre-determined collection of poses and plan skeletons """
         self.reset_symbols()
         self.reset_state()
-        self.robot  = ur5.UR5_Interface() if (not noBot) else None
-        self.logger = DataLogger() if (not noBot) else None
-        self.noViz  = noViz
-        self.noBot  = noBot
         # DEATH MONITOR
         self.noSoln =  0
         self.nonLim = 10
-        if (not noBot):
-            self.robot.start()
-
-
-    def shutdown( self ):
-        """ Stop the Perception Process and the UR5 connection """
-        self.dump_to_file( openNext = False )
-        if not self.noBot:
-            self.robot.stop()
 
 
     ##### Stream Helpers ##################################################
@@ -145,15 +105,6 @@ class TaskPlanner:
         """ Set the goal """
 
         self.goal = nuGoal
-        
-        # ( 'and',
-            
-        #     ('GraspObj', 'grnBlock' , _trgtGrn  ), # ; Tower
-        #     ('Supported', 'ylwBlock', 'grnBlock'), 
-        #     ('Supported', 'bluBlock', 'ylwBlock'),
-
-        #     ('HandEmpty',),
-        # )
 
         if os.environ["_VERBOSE"]:
             print( f"\n### Goal ###" )
@@ -192,7 +143,7 @@ class TaskPlanner:
     
 
 
-    def check_goal_objects( self, goal, symbols ):
+    def check_goal_objects( self, goal, symbols : list[GraspObj] ):
         """ Return True if the labels mentioned in the goals are a subset of the determinized symbols """
         goalSet = set([])
         symbSet = set( [sym.label for sym in symbols] )
