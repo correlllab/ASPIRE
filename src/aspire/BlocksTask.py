@@ -3,8 +3,11 @@ import os
 from random import random
 
 import numpy as np
+from py_trees.common import Status
 
 from magpie.poses import repair_pose
+from magpie.ur5 import UR5_Interface
+
 
 from aspire.env_config import set_blocks_env, env_var, env_sto
 
@@ -15,6 +18,7 @@ _poseGrn[0:3,3] = [ env_var("_MIN_X_OFFSET") +env_var("_X_WRK_SPAN")/2.0, env_va
 
 from aspire.symbols import ObjPose, extract_pose_as_homog, euclidean_distance_between_symbols
 from aspire.utils import diff_norm
+from aspire.SymPlanner import SymPlanner
 
 
 
@@ -67,7 +71,7 @@ def rand_table_pose():
 
 class BlockFunctions:
 
-    def __init__( self, planner ):
+    def __init__( self, planner : SymPlanner ):
         """ Attach to Planner """
         self.planner = planner
 
@@ -144,7 +148,7 @@ class BlockFunctions:
 
     ##### Helper Functions ################################################
 
-    def ground_relevant_predicates( self ):
+    def ground_relevant_predicates( self, robot : UR5_Interface ):
         """ Scan the environment for evidence that the task is progressing, using current beliefs """
         rtnFacts = []
         ## Gripper Predicates ##
@@ -183,16 +187,16 @@ class BlockFunctions:
                         rtnFacts.extend([
                             ('Supported', lblUp, lblDn,),
                             ('Blocked', lblDn,),
-                            ('PoseAbove', self.get_grounded_fact_pose_or_new( posUp ), lblDn,),
+                            ('PoseAbove', self.planner.get_grounded_fact_pose_or_new( posUp ), lblDn,),
                         ])
-        for i, sym_i in enumerate( self.symbols ):
+        for i, sym_i in enumerate( self.planner.symbols ):
             if i not in supDices:
                 rtnFacts.extend( [
                     ('Supported', sym_i.label, 'table',),
-                    ('PoseAbove', self.get_grounded_fact_pose_or_new( sym_i ), 'table',),
+                    ('PoseAbove', self.planner.get_grounded_fact_pose_or_new( sym_i ), 'table',),
                 ] )
         ## Where the robot at? ##
-        robotPose = ObjPose( self.robot.get_tcp_pose() )
+        robotPose = ObjPose( robot.get_tcp_pose() )
         rtnFacts.extend([ 
             ('AtPose', robotPose,),
             ('WayPoint', robotPose,),
@@ -226,3 +230,40 @@ class BlockFunctions:
                 ('PoseAbove', objPose, 'table'),
             ])
         return rtnFacts
+    
+    def instantiate_conditions( self ):
+        if not self.planner.check_goal_objects( self.planner.goal, self.planner.symbols ): 
+            self.planner.status = Status.FAILURE
+        else:
+            
+            self.facts = [ ('Base', 'table',) ] 
+
+            ## Copy `Waypoint`s present in goals ##
+            for g in self.planner.goal[1:]:
+                if g[0] == 'GraspObj':
+                    self.facts.append( ('Waypoint', g[2],) )
+                    if abs( extract_pose_as_homog(g[2])[2,3] - env_var("_BLOCK_SCALE")) < env_var("_ACCEPT_POSN_ERR"):
+                        self.facts.append( ('PoseAbove', g[2], 'table') )
+
+            ## Ground the Blocks ##
+            for sym in self.planner.symbols:
+                self.facts.append( ('Graspable', sym.label,) )
+
+                blockPose = self.planner.get_grounded_fact_pose_or_new( sym )
+
+                # print( f"`blockPose`: {blockPose}" )
+                self.facts.append( ('GraspObj', sym.label, blockPose,) )
+                if not self.planner.p_grounded_fact_pose( blockPose ):
+                    self.facts.append( ('Waypoint', blockPose,) )
+
+            ## Fetch Relevant Facts ##
+            self.facts.extend( self.ground_relevant_predicates() )
+
+            ## Populate Spots for Block Movements ##, 2024-04-25: Injecting this for now, Try a stream later ...
+            self.facts.extend( self.allocate_table_swap_space( env_var("_N_XTRA_SPOTS") ) )
+
+            if env_var("_VERBOSE"):
+                print( f"\n### Initial Symbols ###" )
+                for sym in self.facts:
+                    print( f"\t{sym}" )
+                print()

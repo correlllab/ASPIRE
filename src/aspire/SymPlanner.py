@@ -23,8 +23,7 @@ from py_trees.common import Status
 
 ### ASPIRE ###
 from aspire.symbols import ( ObjPose, GraspObj, extract_pose_as_homog, euclidean_distance_between_symbols )
-from aspire.actions import ( display_PDLS_plan, get_BT_plan, BT_Runner, MoveFree, GroundedAction, 
-                             Interleaved_MoveFree_and_PerceiveScene, )
+from aspire.actions import ( display_PDLS_plan, get_BT_plan, get_BT_plan_until_block_change, )
 
 ### ASPIRE::PDDLStream ### 
 from aspire.pddlstream.pddlstream.utils import read, INF, get_file_path
@@ -44,7 +43,7 @@ class SymPlanner:
 
     def reset_symbols( self ):
         """ Erase belief memory """
-        self.symbols = list() # ------- Determinized beliefs
+        self.symbols : list[GraspObj] = list() # ------- Determinized beliefs
         self.facts   = list() # ------- Grounded predicates
 
 
@@ -54,6 +53,8 @@ class SymPlanner:
         self.task   = None # --------- Current task definition
         self.goal   = tuple() # ------ Current goal specification
         self.grasp  = list() # ------- ? NOT USED ?
+        self.nxtAct = None
+        self.action = None
 
 
     def __init__( self ):
@@ -173,7 +174,7 @@ class SymPlanner:
 
         self.task = self.pddlstream_from_problem()
 
-        self.logger.log_event( "Begin Solver" )
+        # self.logger.log_event( "Begin Solver" )
 
         try:
             
@@ -190,7 +191,7 @@ class SymPlanner:
             print_solution( solution )
             
         except Exception as ex:
-            self.logger.log_event( "SOLVER FAULT", format_exc() )
+            # self.logger.log_event( "SOLVER FAULT", format_exc() )
             self.status = Status.FAILURE
             print_exc()
             solution = (None, None, None)
@@ -201,64 +202,16 @@ class SymPlanner:
         if (plan is not None) and len( plan ):
             display_PDLS_plan( plan )
             self.currPlan = plan
-            # self.action   = get_BT_plan_until_block_change( plan, self, _UPDATE_PERIOD_S )
+            self.nxtAct   = get_BT_plan_until_block_change( plan, self, os.environ["_UPDATE_PERIOD_S"] )
             self.action   = get_BT_plan( plan, self, os.environ["_UPDATE_PERIOD_S"] )
             self.noSoln   = 0 # DEATH MONITOR
         else:
             self.noSoln += 1 # DEATH MONITOR
-            self.logger.log_event( "NO SOLUTION" )
+            # self.logger.log_event( "NO SOLUTION" )
             self.status = Status.FAILURE
 
 
-    def execute_plan( self ):
-        """ Attempt to execute all actions in the symbolic plan """
-        
-        btr = BT_Runner( self.action, os.environ["_BT_UPDATE_HZ"], os.environ["_BT_ACT_TIMEOUT_S"] )
-        btr.setup_BT_for_running()
-
-        lastTip = None
-        currTip = None
-
-        while not btr.p_ended():
-            
-            currTip = btr.tick_once()
-            if currTip != lastTip:
-                self.logger.log_event( f"Behavior: {currTip}", str(btr.status) )
-            lastTip = currTip
-            
-            if (btr.status == Status.FAILURE):
-                self.status = Status.FAILURE
-                self.logger.log_event( "Action Failure", btr.msg )
-
-            btr.per_sleep()
-
-        self.logger.log_event( "BT END", str( btr.status ) )
-
-
-
-    def return_home( self, goPose ):
-        """ Get ready for next iteration while updating beliefs """
-        btAction = GroundedAction( args = list(), robot = self.robot, name = "Return Home" )
-        btAction.add_children([
-            Open_Gripper( ctrl = self.robot ),
-            Interleaved_MoveFree_and_PerceiveScene( 
-                MoveFree( [None, ObjPose( goPose )], robot = self.robot, suppressGrasp = True ), 
-                self, 
-                os.environ["_UPDATE_PERIOD_S"], 
-                initSenseStep = True 
-            ),
-        ])
-        
-        btr = BT_Runner( btAction, os.environ["_BT_UPDATE_HZ"], os.environ["_BT_ACT_TIMEOUT_S"] )
-        btr.setup_BT_for_running()
-
-        while not btr.p_ended():
-            btr.tick_once()
-            btr.per_sleep()
-
-        print( f"\nRobot returned to \n{goPose}\n" )
-        
-
+    
 
     def p_fact_match_noisy( self, pred ):
         """ Search grounded facts for a predicate that matches `pred` """
