@@ -12,6 +12,7 @@ import numpy as np
 
 ### Local ###
 from magpie.poses import translation_diff
+from aspire.env_config import env_var
 
 
 
@@ -53,7 +54,7 @@ def extract_position( obj_or_arr ):
 def p_symbol_inside_workspace_bounds( obj_or_arr ):
     """ Return True if inside the bounding box, Otherwise return False """
     posn = extract_position( obj_or_arr )      
-    return (os.environ["_MIN_X_OFFSET"] <= posn[0] <= os.environ["_MAX_X_OFFSET"]) and (os.environ["_MIN_Y_OFFSET"] <= posn[1] <= os.environ["_MAX_Y_OFFSET"]) and (0.0 < posn[2] <= os.environ["_MAX_Z_BOUND"])
+    return (env_var("_MIN_X_OFFSET") <= posn[0] <= env_var("_MAX_X_OFFSET")) and (env_var("_MIN_Y_OFFSET") <= posn[1] <= env_var("_MAX_Y_OFFSET")) and (0.0 < posn[2] <= env_var("_MAX_Z_BOUND"))
 
 
 def euclidean_distance_between_symbols( sym1, sym2 ):

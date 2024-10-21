@@ -1,5 +1,7 @@
 ########## INIT ####################################################################################
-import os, json
+import os, json, pickle
+import codecs
+
 import numpy as np
 
 
@@ -8,13 +10,15 @@ import numpy as np
 
 def env_sto( varKey, varVal ):
     """ Serialize and save the env var """
-    os.environ[ varKey ] = json.dumps( varVal )
+    # https://stackoverflow.com/a/30469744
+    os.environ[ varKey ] = codecs.encode( pickle.dumps( varVal ), "base64").decode()
 
 
 def env_var( varKey ):
     """ Load and parse the env var """
     try:
-        return json.loads( os.environ[ varKey ] )
+        # https://stackoverflow.com/a/30469744
+        return pickle.loads(codecs.decode( os.environ[ varKey ].encode(), "base64"))
     except KeyError:
         print( f"There was no {varKey} in the environment!" )
         return None

@@ -231,7 +231,7 @@ class BlockFunctions:
             ])
         return rtnFacts
     
-    def instantiate_conditions( self ):
+    def instantiate_conditions( self, robot : UR5_Interface ):
         if not self.planner.check_goal_objects( self.planner.goal, self.planner.symbols ): 
             self.planner.status = Status.FAILURE
         else:
@@ -257,7 +257,7 @@ class BlockFunctions:
                     self.facts.append( ('Waypoint', blockPose,) )
 
             ## Fetch Relevant Facts ##
-            self.facts.extend( self.ground_relevant_predicates() )
+            self.facts.extend( self.ground_relevant_predicates( robot ) )
 
             ## Populate Spots for Block Movements ##, 2024-04-25: Injecting this for now, Try a stream later ...
             self.facts.extend( self.allocate_table_swap_space( env_var("_N_XTRA_SPOTS") ) )

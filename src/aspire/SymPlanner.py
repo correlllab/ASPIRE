@@ -57,13 +57,15 @@ class SymPlanner:
         self.action = None
 
 
-    def __init__( self ):
+    def __init__( self, domainPath, streamPath ):
         """ Create a pre-determined collection of poses and plan skeletons """
         self.reset_symbols()
         self.reset_state()
         # DEATH MONITOR
         self.noSoln =  0
         self.nonLim = 10
+        self.domainPath = domainPath 
+        self.streamPath = streamPath 
 
 
     ##### Stream Helpers ##################################################
@@ -91,8 +93,8 @@ class SymPlanner:
     def pddlstream_from_problem( self, pdls_stream_map = None ):
         """ Set up a PDDLStream problem with the UR5 """
 
-        domain_pddl  = read( get_file_path( __file__, os.path.join( 'task_planning/', 'domain.pddl' ) ) )
-        stream_pddl  = read( get_file_path( __file__, os.path.join( 'task_planning/', 'stream.pddl' ) ) )
+        domain_pddl  = read( self.domainPath )
+        stream_pddl  = read( self.streamPath )
         constant_map = {}
         stream_map = pdls_stream_map if ( pdls_stream_map is not None ) else dict()
 
