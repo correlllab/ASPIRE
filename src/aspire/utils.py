@@ -13,6 +13,8 @@ from spatialmath import Quaternion
 from spatialmath.quaternion import UnitQuaternion
 from spatialmath.base import r2q
 
+from aspire.env_config import env_var
+
 
 
 ########## DEBUGGING ###############################################################################
@@ -49,7 +51,7 @@ def sorted_obj_labels( obj ):
 
 def match_name( shortName ):
     """ Search for the environment object name that matches the abbreviated query """
-    for envName in os.environ["_BLOCK_NAMES"]:
+    for envName in env_var("_BLOCK_NAMES"):
         if shortName in envName:
             return envName
     return None

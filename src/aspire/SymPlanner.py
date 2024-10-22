@@ -26,8 +26,7 @@ from aspire.symbols import ( ObjPose, GraspObj, extract_pose_as_homog, euclidean
 from aspire.actions import ( display_PDLS_plan, get_BT_plan, get_BT_plan_until_block_change, )
 
 ### ASPIRE::PDDLStream ### 
-from aspire.pddlstream.pddlstream.utils import read, INF, get_file_path
-from aspire.pddlstream.pddlstream.language.generator import from_gen_fn, from_test
+from aspire.pddlstream.pddlstream.utils import read, INF
 from aspire.pddlstream.pddlstream.language.constants import print_solution, PDDLProblem
 from aspire.pddlstream.pddlstream.algorithms.meta import solve
 
@@ -142,9 +141,6 @@ class SymPlanner:
                 return fact[2]
         return ObjPose( homog )
     
-    
-    
-
 
     def check_goal_objects( self, goal, symbols : list[GraspObj] ):
         """ Return True if the labels mentioned in the goals are a subset of the determinized symbols """
@@ -171,10 +167,10 @@ class SymPlanner:
         return False
 
 
-    def plan_task( self ):
+    def plan_task( self, pdls_stream_map = None ):
         """ Attempt to solve the symbolic problem """
 
-        self.task = self.pddlstream_from_problem()
+        self.task = self.pddlstream_from_problem( pdls_stream_map = pdls_stream_map )
 
         # self.logger.log_event( "Begin Solver" )
 
