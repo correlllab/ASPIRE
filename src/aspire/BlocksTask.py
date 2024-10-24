@@ -73,6 +73,7 @@ class BlockFunctions:
 
     def __init__( self, planner : SymPlanner ):
         """ Attach to Planner """
+        print( f"Planner Type: {type( planner )}" )
         self.planner = planner
 
     ##### Stream Creators #################################################
@@ -83,7 +84,7 @@ class BlockFunctions:
         def stream_func( *args ):
             """ A function that returns poses """
 
-            if os.environ["_VERBOSE"]:
+            if env_var("_VERBOSE"):
                 print( f"\nEvaluate ABOVE LABEL stream with args: {args}\n" )
 
             objcName = args[0]
@@ -107,7 +108,7 @@ class BlockFunctions:
         def stream_func( *args ):
             """ A function that returns poses """
 
-            if os.environ["_VERBOSE"]:
+            if env_var("_VERBOSE"):
                 print( f"\nEvaluate PLACEMENT POSE stream with args: {args}\n" )
 
             placed   = False
@@ -116,7 +117,7 @@ class BlockFunctions:
                 testPose  = rand_table_pose()
                 print( f"\t\tSample: {testPose}" )
                 for sym in self.planner.symbols:
-                    if euclidean_distance_between_symbols( testPose, sym ) < ( os.environ["_MIN_SEP"] ):
+                    if euclidean_distance_between_symbols( testPose, sym ) < ( env_var("_MIN_SEP") ):
                         collide = True
                         break
                 if not collide:
@@ -137,7 +138,7 @@ class BlockFunctions:
             print( f"Symbols: {self.planner.symbols}" )
 
             for sym in self.planner.symbols:
-                if euclidean_distance_between_symbols( chkPose, sym ) < ( os.environ["_MIN_SEP"] ):
+                if euclidean_distance_between_symbols( chkPose, sym ) < ( env_var("_MIN_SEP") ):
                     print( f"PLACEMENT test FAILURE\n" )
                     return False
             print( f"PLACEMENT test SUCCESS\n" )
@@ -166,7 +167,7 @@ class BlockFunctions:
                 pLbl = g[1]
                 pPos = g[2]
                 tObj = self.planner.get_labeled_symbol( pLbl )
-                if (tObj is not None) and (euclidean_distance_between_symbols( pPos, tObj ) <= os.environ["_ACCEPT_POSN_ERR"]):
+                if (tObj is not None) and (euclidean_distance_between_symbols( pPos, tObj ) <= env_var("_ACCEPT_POSN_ERR")):
                     rtnFacts.append( g ) # Position goal met
         # B. No need to ground the rest
 
@@ -182,7 +183,7 @@ class BlockFunctions:
                     posDn = extract_pose_as_homog( sym_j )
                     xySep = diff_norm( posUp[0:2,3], posDn[0:2,3] )
                     zSep  = posUp[2,3] - posDn[2,3] # Signed value
-                    if ((xySep <= 1.65*os.environ["_BLOCK_SCALE"]) and (1.65*os.environ["_BLOCK_SCALE"] >= zSep >= 0.9*os.environ["_BLOCK_SCALE"])):
+                    if ((xySep <= 1.65*env_var("_BLOCK_SCALE")) and (1.65*env_var("_BLOCK_SCALE") >= zSep >= 0.9*env_var("_BLOCK_SCALE"))):
                         supDices.add(i)
                         rtnFacts.extend([
                             ('Supported', lblUp, lblDn,),
@@ -236,34 +237,34 @@ class BlockFunctions:
             self.planner.status = Status.FAILURE
         else:
             
-            self.facts = [ ('Base', 'table',) ] 
+            self.planner.facts = [ ('Base', 'table',) ] 
 
             ## Copy `Waypoint`s present in goals ##
             for g in self.planner.goal[1:]:
                 if g[0] == 'GraspObj':
-                    self.facts.append( ('Waypoint', g[2],) )
+                    self.planner.facts.append( ('Waypoint', g[2],) )
                     if abs( extract_pose_as_homog(g[2])[2,3] - env_var("_BLOCK_SCALE")) < env_var("_ACCEPT_POSN_ERR"):
-                        self.facts.append( ('PoseAbove', g[2], 'table') )
+                        self.planner.facts.append( ('PoseAbove', g[2], 'table') )
 
             ## Ground the Blocks ##
             for sym in self.planner.symbols:
-                self.facts.append( ('Graspable', sym.label,) )
+                self.planner.facts.append( ('Graspable', sym.label,) )
 
                 blockPose = self.planner.get_grounded_fact_pose_or_new( sym )
 
                 # print( f"`blockPose`: {blockPose}" )
-                self.facts.append( ('GraspObj', sym.label, blockPose,) )
+                self.planner.facts.append( ('GraspObj', sym.label, blockPose,) )
                 if not self.planner.p_grounded_fact_pose( blockPose ):
-                    self.facts.append( ('Waypoint', blockPose,) )
+                    self.planner.facts.append( ('Waypoint', blockPose,) )
 
             ## Fetch Relevant Facts ##
-            self.facts.extend( self.ground_relevant_predicates( robot ) )
+            self.planner.facts.extend( self.ground_relevant_predicates( robot ) )
 
             ## Populate Spots for Block Movements ##, 2024-04-25: Injecting this for now, Try a stream later ...
-            self.facts.extend( self.allocate_table_swap_space( env_var("_N_XTRA_SPOTS") ) )
+            self.planner.facts.extend( self.allocate_table_swap_space( env_var("_N_XTRA_SPOTS") ) )
 
             if env_var("_VERBOSE"):
                 print( f"\n### Initial Symbols ###" )
-                for sym in self.facts:
+                for sym in self.planner.facts:
                     print( f"\t{sym}" )
                 print()

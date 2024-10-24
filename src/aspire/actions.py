@@ -19,7 +19,7 @@ from py_trees.composites import Sequence
 ### Local ###
 from magpie.poses import translation_diff, vec_unit
 from magpie.BT import Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK
-from aspire.symbols import extract_pose_as_homog
+from aspire.symbols import extract_pose_as_homog, env_var
 
 
 
@@ -297,7 +297,7 @@ class MoveFree( GroundedAction ):
         self.poseEnd = extract_pose_as_homog( poseEnd )
                 
         self.add_child(
-            Move_Arm( self.poseEnd, ctrl = robot, linSpeed = os.environ["_ROBOT_FREE_SPEED"] )
+            Move_Arm( self.poseEnd, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") )
         )
 
 
@@ -351,8 +351,8 @@ class MoveHolding( GroundedAction ):
         poseEnd = grasp_pose_from_obj_pose( extract_pose_as_homog( poseEnd ) )
         psnMid1 = np.array( poseBgn[0:3,3] )
         psnMid2 = np.array( poseEnd[0:3,3] )
-        psnMid1[2] = os.environ["_Z_SAFE"]
-        psnMid2[2] = os.environ["_Z_SAFE"]
+        psnMid1[2] = env_var("_Z_SAFE")
+        psnMid2[2] = env_var("_Z_SAFE")
         poseMd1 = np.eye(4) 
         poseMd2 = np.eye(4)
         poseMd1[0:3,0:3] = PROTO_PICK_ROT
@@ -361,12 +361,16 @@ class MoveHolding( GroundedAction ):
         poseMd2[0:3,3] = psnMid2
     
         checkedMotion = Sequence( name = "Move Without Dropping", memory = False )
-        dropChecker   = Gripper_Aperture_OK( os.environ["_BLOCK_SCALE"], margin_m = os.environ["_BLOCK_SCALE"]*0.50, name = "Check Holding", ctrl = robot  )
+        dropChecker   = Gripper_Aperture_OK( 
+            env_var("_BLOCK_SCALE"), 
+            margin_m = env_var("_BLOCK_SCALE")*0.50, 
+            name = "Check Holding", ctrl = robot  
+        )
         transportMotn = Sequence( name = "Move Object", memory = True )
         transportMotn.add_children( [
-            Move_Arm( poseMd1, ctrl = robot, linSpeed = os.environ["_ROBOT_HOLD_SPEED"] ),
-            Move_Arm( poseMd2, ctrl = robot, linSpeed = os.environ["_ROBOT_HOLD_SPEED"] ),
-            Move_Arm( poseEnd, ctrl = robot, linSpeed = os.environ["_ROBOT_HOLD_SPEED"] ),
+            Move_Arm( poseMd1, ctrl = robot, linSpeed = env_var("_ROBOT_HOLD_SPEED") ),
+            Move_Arm( poseMd2, ctrl = robot, linSpeed = env_var("_ROBOT_HOLD_SPEED") ),
+            Move_Arm( poseEnd, ctrl = robot, linSpeed = env_var("_ROBOT_HOLD_SPEED") ),
         ] )
         checkedMotion.add_children([
             dropChecker,
@@ -435,6 +439,7 @@ class PerceiveScene( BasicBehavior ):
     def __init__( self, args, robot = None, name = None, planner = None ):
 
         assert planner is not None, "`PerceiveScene` REQUIRES a planner reference!"
+        print( f"Planner Type: {type( planner )}" )
         self.planner  = planner
         self.args     = args
         self.needCool = False
@@ -455,20 +460,19 @@ class PerceiveScene( BasicBehavior ):
             self.needCool = False
     
 
-
     def update( self ):
         """ Return true if the target reached """
         if self.needCool:
-            sleep( os.environ["_MOVE_COOLDOWN_S"] )
+            sleep( env_var("_MOVE_COOLDOWN_S") )
         if self.ctrl.p_moving():
             timeStr = datetime.now().strftime("%H:%M:%S")
             print( f"\n`PerceiveScene.initialise`: Robot was MOVING at UPDATE time: {timeStr}!\n" )
             self.status = Status.FAILURE
         else:
             camPose = self.ctrl.get_cam_pose()
-            self.planner.phase_1_Perceive( 1, camPose )
+            self.planner.percFunc( 1, camPose )
             sleep( 0.25 )
-            if self.planner.p_belief_dist_OK():
+            if self.planner.chckFunc():
                 self.status = Status.SUCCESS
             else:
                 self.status = Status.FAILURE
@@ -481,6 +485,7 @@ class Interleaved_MoveFree_and_PerceiveScene( GroundedAction ):
     # FUTURE: PROBABLY MORE SOPHISTICATED SENSORY PLANNING GOES HERE
 
     def __init__( self, mfBT, planner, sensePeriod_s, name = None, initSenseStep = True ):
+        """ Init BT """
         self._VERBOSE = True
 
         targetP = mfBT.poseEnd.copy()
@@ -491,11 +496,13 @@ class Interleaved_MoveFree_and_PerceiveScene( GroundedAction ):
         super().__init__( mfBT.args, mfBT.ctrl, name )
 
         # Init #
-        self.planner = planner
-        self.distMax = os.environ["_ROBOT_FREE_SPEED"] * sensePeriod_s
-        self.zSAFE   = max( os.environ["_Z_SAFE"], targetP[2,3] ) # Eliminate (some) silly vertical movements
-        self.bgnShot = initSenseStep
-        self.mfBT    = mfBT
+        print( f"Planner Type: {type( planner )}" )
+        self.planner  = planner
+        print( env_var("_ROBOT_FREE_SPEED"), sensePeriod_s )
+        self.distMax  = env_var("_ROBOT_FREE_SPEED") * sensePeriod_s
+        self.zSAFE    = max( env_var("_Z_SAFE"), targetP[2,3] ) # Eliminate (some) silly vertical movements
+        self.bgnShot  = initSenseStep
+        self.mfBT     = mfBT
         
         # Poses to be Modified at Ticktime #
         self.targetP = targetP
@@ -524,7 +531,7 @@ class Interleaved_MoveFree_and_PerceiveScene( GroundedAction ):
         def check_and_correct_extreme_closeup( tcpPose ):
             """ Check and correct `camPose` for insufficient PCD clearance, Return corrected pose """
 
-            camPose = np.dot( tcpPose, self.planner.robot.camXform )
+            camPose = np.dot( tcpPose, self.mfBT.ctrl.camXform )
             zzMag   = camPose[2,2]
 
             # 1. If downward-facing, then Check for correction
@@ -538,8 +545,8 @@ class Interleaved_MoveFree_and_PerceiveScene( GroundedAction ):
                     if self._VERBOSE:
                         print( f"\n`Interleaved_MoveFree_and_PerceiveScene.initialise`: Plan move opposite of ray from {camPosn} along {hndZdir}\n" )
                 dShot = np.linalg.norm( np.subtract( XYintrc, camPosn ) )
-                if dShot < os.environ["_MIN_CAM_PCD_DIST_M"]:
-                    dMove     = os.environ["_MIN_CAM_PCD_DIST_M"] - dShot
+                if dShot < env_var("_MIN_CAM_PCD_DIST_M"):
+                    dMove     = env_var("_MIN_CAM_PCD_DIST_M") - dShot
                     backupDir = hndZdir
                     assert backupDir[2] > 0.0, "Moving DOWN for a better shot is WRONG"
                     backpMove = np.multiply( backupDir, dMove )
@@ -561,7 +568,11 @@ class Interleaved_MoveFree_and_PerceiveScene( GroundedAction ):
         if self.bgnShot:
             truShot = check_and_correct_extreme_closeup( nowPose )
             if translation_diff( truShot, nowPose ) <= epsilon:
-                self.prepend_child( PerceiveScene( self.mfBT.args, robot = self.mfBT.ctrl, name = "PerceiveScene 1", planner = self.planner ) )
+                self.prepend_child( PerceiveScene( 
+                    self.mfBT.args, 
+                    robot = self.mfBT.ctrl, 
+                    name = "PerceiveScene 1", 
+                    planner = self.planner ) )
         
         # 5. Compute intermediate poses
         self.pose1up = nowPose.copy()
@@ -621,7 +632,7 @@ class Interleaved_MoveFree_and_PerceiveScene( GroundedAction ):
                     stepPose = translate_pose_along_direction( lastPose, legDirV_i, stepDist )
                     stepPose[0:3,0:3] = dstPose_i[0:3,0:3]
 
-                    seqMove_i.add_child(  Move_Arm( stepPose, ctrl = self.ctrl, linSpeed = os.environ["_ROBOT_FREE_SPEED"] )  )
+                    seqMove_i.add_child(  Move_Arm( stepPose, ctrl = self.ctrl, linSpeed = env_var("_ROBOT_FREE_SPEED") )  )
                     moveNum += 1
                     if self._VERBOSE:
                         print( f"WP {moveNum}:" )
@@ -638,11 +649,11 @@ class Interleaved_MoveFree_and_PerceiveScene( GroundedAction ):
                     # H. If too close, then back up, take shot, and return to planned pose
                     if translation_diff( shotPose, lastPose ) > epsilon:
                         seqMove_i.add_children([  
-                            Move_Arm( shotPose, name = "Camera Backup", ctrl = self.ctrl, linSpeed = os.environ["_ROBOT_FREE_SPEED"] ),
+                            Move_Arm( shotPose, name = "Camera Backup", ctrl = self.ctrl, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
                             PerceiveScene( self.args, 
                                            self.ctrl, 
                                            name = f"PerceiveScene {senseNum}", planner = self.planner ),
-                            Move_Arm( lastPose, name = "Camera Return", ctrl = self.ctrl, linSpeed = os.environ["_ROBOT_FREE_SPEED"] ),
+                            Move_Arm( lastPose, name = "Camera Return", ctrl = self.ctrl, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
                         ])
                     # I. Else no correction required
                     else:
@@ -698,12 +709,13 @@ def get_ith_BT_action_from_PDLS_plan( pdlsPlan, i, robot, planner, sensePeriod_s
     actName  = pdlsPlan[i].name
     actArgs  = pdlsPlan[i].args
     btAction = None
+    print( f"Planner Type: {type( planner )}" )
     if actName == "move_free":
         btAction = Interleaved_MoveFree_and_PerceiveScene( 
             MoveFree( actArgs, robot = robot ), 
             planner, 
             sensePeriod_s, 
-            initSenseStep = True 
+            initSenseStep = True
         )
     elif actName == "pick":
         btAction = Pick( actArgs, robot = robot )
@@ -721,12 +733,13 @@ def get_ith_BT_action_from_PDLS_plan( pdlsPlan, i, robot, planner, sensePeriod_s
     return btAction
 
 
-def get_BT_plan_until_block_change( pdlsPlan, planner, sensePeriod_s ):
+def get_BT_plan_until_block_change( pdlsPlan, planner, sensePeriod_s, robot ):
     """ Translate the PDLS plan to one that can be executed by the robot """
     rtnBTlst = []
+    print( f"Planner Type: {type( planner )}" )
     if pdlsPlan is not None:
         for i in range( len( pdlsPlan ) ):
-            btAction = get_ith_BT_action_from_PDLS_plan( pdlsPlan, i, planner.robot, planner, sensePeriod_s )
+            btAction = get_ith_BT_action_from_PDLS_plan( pdlsPlan, i, robot, planner, sensePeriod_s )
             rtnBTlst.append( btAction )
             if btAction.__class__ in ( Place, Stack ):
                 break
@@ -735,12 +748,13 @@ def get_BT_plan_until_block_change( pdlsPlan, planner, sensePeriod_s ):
     return rtnPlan
 
 
-def get_BT_plan( pdlsPlan, planner, sensePeriod_s ):
+def get_BT_plan( pdlsPlan, planner, sensePeriod_s, robot ):
     """ Translate the PDLS plan to one that can be executed by the robot """
     rtnBTlst = []
+    print( f"Planner Type: {type( planner )}" )
     if pdlsPlan is not None:
         for i in range( len( pdlsPlan ) ):
-            btAction = get_ith_BT_action_from_PDLS_plan( pdlsPlan, i, planner.robot, planner, sensePeriod_s )
+            btAction = get_ith_BT_action_from_PDLS_plan( pdlsPlan, i, robot, planner, sensePeriod_s )
             rtnBTlst.append( btAction )
     rtnPlan = Plan()
     rtnPlan.add_children( rtnBTlst )

@@ -75,7 +75,7 @@ def extract_dct_values_in_order_conf( dct, keyLst, insertZero = False ):
     rtnLst = []
     altNam = dict()
     for k in dct.keys():
-        if match_name(k) in os.environ["_BLOCK_NAMES"]:
+        if match_name(k) in env_var("_BLOCK_NAMES"):
             altNam[ match_name(k) ] = k
     for k in keyLst:
         if k in dct:

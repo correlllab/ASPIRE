@@ -22,7 +22,7 @@ import numpy as np
 from py_trees.common import Status
 
 ### ASPIRE ###
-from aspire.symbols import ( ObjPose, GraspObj, extract_pose_as_homog, euclidean_distance_between_symbols )
+from aspire.symbols import ( ObjPose, GraspObj, extract_pose_as_homog, euclidean_distance_between_symbols, env_var, )
 from aspire.actions import ( display_PDLS_plan, get_BT_plan, get_BT_plan_until_block_change, )
 
 ### ASPIRE::PDDLStream ### 
@@ -39,6 +39,13 @@ class SymPlanner:
     """ Basic task planning loop """
 
     ##### Init ############################################################
+
+
+    def set_update_funcs( self, percFunc, chckFunc ):
+        """ Set the update functions """
+        self.percFunc = percFunc
+        self.chckFunc = chckFunc
+
 
     def reset_symbols( self ):
         """ Erase belief memory """
@@ -72,7 +79,7 @@ class SymPlanner:
     def get_grounded_pose_or_new( self, homog ):
         """ If there is a `Waypoint` approx. to `homog`, then return it, Else create new `ObjPose` """
         for fact in self.facts:
-            if fact[0] == 'Waypoint' and ( euclidean_distance_between_symbols( homog, fact[1] ) <= os.environ["_ACCEPT_POSN_ERR"]):
+            if fact[0] == 'Waypoint' and ( euclidean_distance_between_symbols( homog, fact[1] ) <= env_var("_ACCEPT_POSN_ERR") ):
                 return fact[1]
         return ObjPose( homog )
 
@@ -81,7 +88,7 @@ class SymPlanner:
         """ Does this exist as a `Waypoint`? """
         homog = extract_pose_as_homog( poseOrObj )
         for fact in self.facts:
-            if fact[0] == 'Waypoint' and ( euclidean_distance_between_symbols( homog, fact[1] ) <= os.environ["_ACCEPT_POSN_ERR"]):
+            if fact[0] == 'Waypoint' and ( euclidean_distance_between_symbols( homog, fact[1] ) <= env_var("_ACCEPT_POSN_ERR") ):
                 return True
         return False
 
@@ -97,7 +104,7 @@ class SymPlanner:
         constant_map = {}
         stream_map = pdls_stream_map if ( pdls_stream_map is not None ) else dict()
 
-        if os.environ["_VERBOSE"]:
+        if env_var("_VERBOSE"):
             print( "About to create problem ... " )
 
         return PDDLProblem( domain_pddl, constant_map, stream_pddl, stream_map, self.facts, self.goal )
@@ -108,7 +115,7 @@ class SymPlanner:
 
         self.goal = nuGoal
 
-        if os.environ["_VERBOSE"]:
+        if env_var("_VERBOSE"): 
             print( f"\n### Goal ###" )
             pprint( self.goal )
             print()
@@ -135,9 +142,9 @@ class SymPlanner:
     def get_grounded_fact_pose_or_new( self, homog ):
         """ If there is a `Waypoint` approx. to `homog`, then return it, Else create new `ObjPose` """ 
         for fact in self.facts:
-            if fact[0] == 'Waypoint' and (euclidean_distance_between_symbols( homog, fact[1] ) <= os.environ["_ACCEPT_POSN_ERR"]):
+            if fact[0] == 'Waypoint' and (euclidean_distance_between_symbols( homog, fact[1] ) <= env_var("_ACCEPT_POSN_ERR")):
                 return fact[1]
-            if fact[0] == 'GraspObj' and (euclidean_distance_between_symbols( homog, fact[2] ) <= os.environ["_ACCEPT_POSN_ERR"]):
+            if fact[0] == 'GraspObj' and (euclidean_distance_between_symbols( homog, fact[2] ) <= env_var("_ACCEPT_POSN_ERR")):
                 return fact[2]
         return ObjPose( homog )
     
@@ -167,8 +174,10 @@ class SymPlanner:
         return False
 
 
-    def plan_task( self, pdls_stream_map = None ):
+    def plan_task( self, pdls_stream_map = None, robot = None ):
         """ Attempt to solve the symbolic problem """
+
+        print( f"About to plan task, WHAT IS ME? {type(self)}" )
 
         self.task = self.pddlstream_from_problem( pdls_stream_map = pdls_stream_map )
 
@@ -200,8 +209,9 @@ class SymPlanner:
         if (plan is not None) and len( plan ):
             display_PDLS_plan( plan )
             self.currPlan = plan
-            self.nxtAct   = get_BT_plan_until_block_change( plan, self, os.environ["_UPDATE_PERIOD_S"] )
-            self.action   = get_BT_plan( plan, self, os.environ["_UPDATE_PERIOD_S"] )
+            print( f"\nPlanning Task, Planner Type: {type( self )}\n" )
+            self.nxtAct   = get_BT_plan_until_block_change( plan, self, env_var("_UPDATE_PERIOD_S"), robot )
+            self.action   = get_BT_plan( plan, self, env_var("_UPDATE_PERIOD_S"), robot )
             self.noSoln   = 0 # DEATH MONITOR
         else:
             self.noSoln += 1 # DEATH MONITOR

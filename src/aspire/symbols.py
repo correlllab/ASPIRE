@@ -98,7 +98,7 @@ class GraspObj:
         """ Set components used by planners """
         ### Single Object ###
         self.index  = next( self.num )
-        self.label  = label if (label is not None) else os.environ["_NULL_NAME"]
+        self.label  = label if (label is not None) else env_var("_NULL_NAME")
         self.prob   = prob if (prob is not None) else 0.0 # 2024-07-22: This is for sorting dupes in the planner and is NOT used by PDDLStream
         self.pose   = pose if (pose is not None) else ObjPose( np.eye(4) )
         ### Distribution ###
@@ -114,7 +114,9 @@ class GraspObj:
 
     def __repr__( self ):
         """ Text representation of noisy reading """
-        if len( self.labels ):
+        if self.label is not None:
+            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Score: {str(self.score)}>"
+        elif len( self.labels ):
             return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.labels)}, Score: {str(self.score)}>"
         else:
             return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Score: {str(self.score)}>"
