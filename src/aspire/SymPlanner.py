@@ -217,8 +217,6 @@ class SymPlanner:
             self.noSoln += 1 # DEATH MONITOR
             # self.logger.log_event( "NO SOLUTION" )
             self.status = Status.FAILURE
-
-
     
 
     def p_fact_match_noisy( self, pred ):
