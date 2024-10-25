@@ -26,7 +26,7 @@ def extract_np_array_pose( obj_or_arr ):
     elif isinstance( obj_or_arr, ObjPose ):
         return np.array( obj_or_arr.pose )
     elif isinstance( obj_or_arr, (GraspObj,) ):
-        return np.array( obj_or_arr.pose.pose )
+        return extract_np_array_pose( obj_or_arr.pose )
     else:
         return None
     
