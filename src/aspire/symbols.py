@@ -11,7 +11,7 @@ from itertools import count
 import numpy as np
 
 ### Local ###
-from magpie.poses import translation_diff
+from magpie_control.poses import translation_diff
 from aspire.env_config import env_var
 
 
@@ -111,10 +111,9 @@ class GraspObj:
         self.LKG     = False # -------------------------------- Flag: Part of the Last-Known-Good collection?
 
 
-
     def __repr__( self ):
         """ Text representation of noisy reading """
-        if self.label is not None:
+        if self.label != env_var("_NULL_NAME"):
             return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Score: {str(self.score)}>"
         elif len( self.labels ):
             return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.labels)}, Score: {str(self.score)}>"

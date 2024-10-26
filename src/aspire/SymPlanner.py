@@ -198,7 +198,7 @@ class SymPlanner:
             print_solution( solution )
             
         except Exception as ex:
-            # self.logger.log_event( "SOLVER FAULT", format_exc() )
+            print( f"SOLVER FAULT:\n{format_exc()}\n" )
             self.status = Status.FAILURE
             print_exc()
             solution = (None, None, None)

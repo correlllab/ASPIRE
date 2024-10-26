@@ -5,8 +5,8 @@ from random import random
 import numpy as np
 from py_trees.common import Status
 
-from magpie.poses import repair_pose
-from magpie.ur5 import UR5_Interface
+from magpie_control.poses import repair_pose
+from magpie_control.ur5 import UR5_Interface
 
 
 from aspire.env_config import set_blocks_env, env_var, env_sto

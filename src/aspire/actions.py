@@ -17,8 +17,8 @@ from py_trees.common import Status
 from py_trees.composites import Sequence
 
 ### Local ###
-from magpie.poses import translation_diff, vec_unit
-from magpie.BT import Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK
+from magpie_control.poses import translation_diff, vec_unit
+from magpie_control.BT import Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK
 from aspire.symbols import extract_pose_as_homog, env_var
 
 
@@ -469,8 +469,7 @@ class PerceiveScene( BasicBehavior ):
             print( f"\n`PerceiveScene.initialise`: Robot was MOVING at UPDATE time: {timeStr}!\n" )
             self.status = Status.FAILURE
         else:
-            camPose = self.ctrl.get_cam_pose()
-            self.planner.percFunc( 1, camPose )
+            self.planner.percFunc( 1 )
             sleep( 0.25 )
             if self.planner.chckFunc():
                 self.status = Status.SUCCESS
