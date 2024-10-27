@@ -177,6 +177,8 @@ class SymPlanner:
     def plan_task( self, pdls_stream_map = None, robot = None ):
         """ Attempt to solve the symbolic problem """
 
+        self.status = Status.RUNNING
+
         print( f"About to plan task, WHAT IS ME? {type(self)}" )
 
         self.task = self.pddlstream_from_problem( pdls_stream_map = pdls_stream_map )
@@ -207,6 +209,7 @@ class SymPlanner:
         plan, cost, evaluations = solution
 
         if (plan is not None) and len( plan ):
+            self.status = Status.SUCCESS
             display_PDLS_plan( plan )
             self.currPlan = plan
             print( f"\nPlanning Task, Planner Type: {type( self )}\n" )

@@ -95,11 +95,11 @@ def set_object_env():
 
 def set_workspace_env():
     """ Set working envelope """
-    env_sto( "_SPACE_EXPAND",  0.100 ) 
-    env_sto( "_MIN_X_OFFSET", -0.380 - env_var( "_SPACE_EXPAND" ) )
-    env_sto( "_MAX_X_OFFSET", -0.060 + env_var( "_SPACE_EXPAND" ) )
-    env_sto( "_MIN_Y_OFFSET", -0.614 - env_var( "_SPACE_EXPAND" ) )
-    env_sto( "_MAX_Y_OFFSET", -0.290 + env_var( "_SPACE_EXPAND" ) )
+    env_sto( "_SPACE_EXPAND",  0.050 ) 
+    env_sto( "_MIN_X_OFFSET", -0.442 - env_var( "_SPACE_EXPAND" ) )
+    env_sto( "_MAX_X_OFFSET", -0.184 + env_var( "_SPACE_EXPAND" ) )
+    env_sto( "_MIN_Y_OFFSET", -0.356 - env_var( "_SPACE_EXPAND" ) ) 
+    env_sto( "_MAX_Y_OFFSET", -0.150 + env_var( "_SPACE_EXPAND" ) )
     env_sto( "_MAX_Z_BOUND", env_var( "_BLOCK_SCALE" )*4.0 )
     env_sto( "_X_WRK_SPAN", env_var( "_MAX_X_OFFSET" ) - env_var( "_MIN_X_OFFSET" ) )
     env_sto( "_Y_WRK_SPAN", env_var( "_MAX_Y_OFFSET" ) - env_var( "_MIN_Y_OFFSET" ) )
