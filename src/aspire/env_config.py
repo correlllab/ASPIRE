@@ -42,8 +42,8 @@ def set_global_env():
 
 def set_grahpics_env():
     """ Graphical Debugging Options """
-    env_sto( "_USE_GRAPHICS", False ) 
-    env_sto( "_RECORD_SYM_SEQ", True )
+    env_sto( "_USE_GRAPHICS", True ) 
+    # env_sto( "_RECORD_SYM_SEQ", True )
     env_sto( "_BLOCK_ALPHA", 1.0 )
     env_sto( "_CLR_TABLE", {
         'red': [1.0, 0.0, 0.0,],
@@ -51,7 +51,8 @@ def set_grahpics_env():
         'blu': [0.0, 0.0, 1.0,],
         'grn': [0.0, 1.0, 0.0,],
         'orn': [1.0, 0.5, 0.0,],
-        'vio': [0.5, 0.0, 1.0,]
+        'vio': [0.5, 0.0, 1.0,],
+        env_var("_NULL_NAME")[:3]: [1.0, 1.0, 1.0,],
     } )
 
 
@@ -136,3 +137,4 @@ def set_blocks_env():
     set_object_env()
     set_robot_env()
     set_camera_env()
+    set_grahpics_env()
