@@ -92,7 +92,7 @@ class BlockFunctions:
             for sym in self.planner.symbols:
                 if sym.label == objcName:
                     upPose = extract_pose_as_homog( sym )
-                    upPose[2,3] += env_var("_BLOCK_SCALE")
+                    upPose[2,3] += (env_var("_BLOCK_SCALE") + env_var("_Z_STACK_BOOST"))
 
                     rtnPose = self.planner.get_grounded_fact_pose_or_new( upPose )
                     print( f"FOUND a pose {rtnPose} supported by {objcName}!" )
@@ -167,8 +167,11 @@ class BlockFunctions:
                 pLbl = g[1]
                 pPos = g[2]
                 tObj = self.planner.get_labeled_symbol( pLbl )
-                if (tObj is not None) and (euclidean_distance_between_symbols( pPos, tObj ) <= env_var("_ACCEPT_POSN_ERR")):
-                    rtnFacts.append( g ) # Position goal met
+                if (tObj is not None) and (euclidean_distance_between_symbols( pPos, tObj ) <= env_var("_WIDE_XY_ACCEPT")):
+                    rtnFacts.append( g ) # 
+                    print( f"Position Goal MET: {pPos} / {tObj.pose}" )
+                else:
+                    print( f"Position Goal NOT MET: {pPos} / {tObj.pose}" )
         # B. No need to ground the rest
 
         ## Support Predicates && Blocked Status ##
@@ -183,7 +186,12 @@ class BlockFunctions:
                     posDn = extract_pose_as_homog( sym_j )
                     xySep = diff_norm( posUp[0:2,3], posDn[0:2,3] )
                     zSep  = posUp[2,3] - posDn[2,3] # Signed value
-                    if ((xySep <= 1.65*env_var("_BLOCK_SCALE")) and (1.65*env_var("_BLOCK_SCALE") >= zSep >= 0.9*env_var("_BLOCK_SCALE"))):
+                    # if ((xySep <= 1.65*env_var("_BLOCK_SCALE")) and (1.65*env_var("_BLOCK_SCALE") >= zSep >= 0.9*env_var("_BLOCK_SCALE"))):
+
+                    print( f"\nSupport Check: {xySep}, {(xySep <= env_var('_WIDE_XY_ACCEPT'))} and {zSep}, {( env_var('_WIDE_Z_ABOVE') >= zSep >= env_var('_LKG_SEP'))}\n")
+
+
+                    if ((xySep <= env_var("_WIDE_XY_ACCEPT")) and ( env_var("_WIDE_Z_ABOVE") >= zSep >= env_var("_LKG_SEP"))):
                         supDices.add(i)
                         rtnFacts.extend([
                             ('Supported', lblUp, lblDn,),

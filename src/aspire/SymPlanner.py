@@ -178,6 +178,8 @@ class SymPlanner:
         """ Attempt to solve the symbolic problem """
 
         self.status = Status.RUNNING
+        self.nxtAct = None
+        self.action = None
 
         print( f"About to plan task, WHAT IS ME? {type(self)}" )
 
@@ -209,13 +211,15 @@ class SymPlanner:
         plan, cost, evaluations = solution
 
         if (plan is not None) and len( plan ):
-            self.status = Status.SUCCESS
+            self.status = Status.RUNNING
             display_PDLS_plan( plan )
             self.currPlan = plan
             print( f"\nPlanning Task, Planner Type: {type( self )}\n" )
             self.nxtAct   = get_BT_plan_until_block_change( plan, self, env_var("_UPDATE_PERIOD_S"), robot )
             self.action   = get_BT_plan( plan, self, env_var("_UPDATE_PERIOD_S"), robot )
             self.noSoln   = 0 # DEATH MONITOR
+        elif (plan is not None) and (len( plan ) == 0) and (cost < 0.0001):
+            self.status = Status.SUCCESS
         else:
             self.noSoln += 1 # DEATH MONITOR
             # self.logger.log_event( "NO SOLUTION" )
@@ -244,10 +248,16 @@ class SymPlanner:
     
     def validate_goal_noisy( self, goal ):
         """ Check if the system believes the goal is met """
+
+        print( f"\n\n##### Validating goal #####" )
         if goal[0] == 'and':
             for g in goal[1:]:
+                print( f"Checking goal {g}:", end=" " )
                 if not self.p_fact_match_noisy( g ):
+                    print( "UNMET\n\n" )
                     return False
+                print( "MET" )
+            print( "GOAL MET\n\n" )
             return True
         else:
             raise ValueError( f"Unexpected goal format!: {goal}" )

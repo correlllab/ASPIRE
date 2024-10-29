@@ -710,12 +710,13 @@ def get_ith_BT_action_from_PDLS_plan( pdlsPlan, i, robot, planner, sensePeriod_s
     btAction = None
     print( f"Planner Type: {type( planner )}" )
     if actName == "move_free":
-        btAction = Interleaved_MoveFree_and_PerceiveScene( 
-            MoveFree( actArgs, robot = robot ), 
-            planner, 
-            sensePeriod_s, 
-            initSenseStep = True
-        )
+        btAction = MoveFree( actArgs, robot = robot )
+        # btAction = Interleaved_MoveFree_and_PerceiveScene( 
+        #     MoveFree( actArgs, robot = robot ), 
+        #     planner, 
+        #     sensePeriod_s, 
+        #     initSenseStep = False
+        # )
     elif actName == "pick":
         btAction = Pick( actArgs, robot = robot )
     elif actName == "unstack":

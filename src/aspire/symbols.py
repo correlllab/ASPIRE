@@ -94,7 +94,7 @@ class GraspObj:
     
     num = count()
 
-    def __init__( self, label = None, pose = None, prob = None, score = None, labels = None, ts = None, count = 0 ):
+    def __init__( self, label = None, pose = None, prob = None, score = None, labels = None, ts = None, count = 0, parent = None ):
         """ Set components used by planners """
         ### Single Object ###
         self.index  = next( self.num )
@@ -102,13 +102,14 @@ class GraspObj:
         self.prob   = prob if (prob is not None) else 0.0 # 2024-07-22: This is for sorting dupes in the planner and is NOT used by PDDLStream
         self.pose   = pose if (pose is not None) else ObjPose( np.eye(4) )
         ### Distribution ###
-        self.labels  = labels if (labels is not None) else {} # Current belief in each class
+        self.labels : dict = labels if (labels is not None) else {} # Current belief in each class
         self.visited = False # -------------------------------- Flag: Was this belief associated with a relevant reading
         ### Object Memory ###
-        self.ts      = ts if (ts is not None) else now() # ---- When was this reading created? [epoch time]
-        self.count   = count # -------------------------------- How many bounding boxes generated this reading?
+        self.ts     = ts if (ts is not None) else now() # --- When was this reading created? [epoch time]
+        self.count  = count # ------------------------------- How many bounding boxes generated this reading?
         self.score  = score if (score is not None) else 0.0 # 2024-07-25: This is for sorting dupes in the planner and is NOT used by PDDLStream
-        self.LKG     = False # -------------------------------- Flag: Part of the Last-Known-Good collection?
+        self.LKG    = False # ------------------------------- Flag: Part of the Last-Known-Good collection?
+        self.parent : GraspObj = parent # ------------------------------ Parent object this was copied from
 
 
     def __repr__( self ):
