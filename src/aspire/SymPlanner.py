@@ -238,9 +238,13 @@ class SymPlanner:
                     elif isinstance( pred[i], str ) and (pred[i] != fact[i]):
                         same = False
                         break
-                    elif (pred[i].index != fact[i].index):
+                    elif isinstance( pred[i], ObjPose ) and (euclidean_distance_between_symbols( pred[i], fact[i] ) >= env_var("_ACCEPT_POSN_ERR")):
                         same = False
                         break
+                    # WARNING: THIS IS BAD, BUT UNSURE WHAT WILL BREAK IF I REMOVE IT
+                    # elif (pred[i].index != fact[i].index):
+                    #     same = False
+                    #     break
                 if same:
                     return True
         return False
