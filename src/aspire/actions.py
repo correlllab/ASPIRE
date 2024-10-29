@@ -18,7 +18,7 @@ from py_trees.composites import Sequence
 
 ### Local ###
 from magpie_control.poses import translation_diff, vec_unit
-from magpie_control.BT import Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK
+from magpie_control.BT import Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK, Set_Gripper
 from aspire.symbols import extract_pose_as_homog, env_var
 
 
@@ -392,9 +392,20 @@ class Place( GroundedAction ):
             name = f"Place {label} at {pose.pose} onto {support}"
         super().__init__( args, robot, name )
 
-        self.add_child( 
-            Open_Gripper( ctrl = robot  )
-        )
+        # self.add_child( 
+        #     Open_Gripper( ctrl = robot  )
+        # )
+
+        self.add_children([ 
+            Set_Gripper( env_var("_BLOCK_SCALE")*2.0, name = "Release Object", ctrl = robot ),
+            Close_Gripper( ctrl = robot ),
+            Gripper_Aperture_OK( 
+                env_var("_BLOCK_SCALE"), 
+                margin_m = env_var("_BLOCK_SCALE")*0.50, 
+                name = "Check Placed", ctrl = robot  
+            ),
+            Open_Gripper( ctrl = robot ),
+        ])
 
 
 class Stack( GroundedAction ):
@@ -408,9 +419,20 @@ class Stack( GroundedAction ):
             name = f"Stack {labelUp} at {poseUp.pose} onto {labelDn}"
         super().__init__( args, robot, name )
 
-        self.add_child( 
-            Open_Gripper( ctrl = robot  )
-        )
+        # self.add_child( 
+        #     Open_Gripper( ctrl = robot  )
+        # )
+
+        self.add_children([ 
+            Set_Gripper( env_var("_BLOCK_SCALE")*2.0, name = "Release Object", ctrl = robot ),
+            Close_Gripper( ctrl = robot ),
+            Gripper_Aperture_OK( 
+                env_var("_BLOCK_SCALE"), 
+                margin_m = env_var("_BLOCK_SCALE")*0.50, 
+                name = "Check Placed", ctrl = robot  
+            ),
+            Open_Gripper( ctrl = robot ),
+        ])
 
 
 
