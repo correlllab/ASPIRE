@@ -16,7 +16,6 @@ from aspire.env_config import env_var
 
 
 
-
 ########## HELPER FUNCTIONS ########################################################################
 
 def extract_np_array_pose( obj_or_arr ):
@@ -64,6 +63,7 @@ def euclidean_distance_between_symbols( sym1, sym2 ):
     return translation_diff( pose1, pose2 )
 
 
+
 ########## COMPONENTS ##############################################################################
 
 
@@ -87,7 +87,6 @@ class ObjPose:
         """ Text representation """
         return f"<ObjPose {self.index}, Vec: {extract_position( self.pose )} >"
     
-
 
 class GraspObj:
     """ The concept of a named object at a pose """
