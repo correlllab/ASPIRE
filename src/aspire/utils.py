@@ -2,14 +2,13 @@
 
 ##### Imports #####
 
-import pickle, math, time, datetime, copy, os
+import math, time, os
 now = time.time
 
 from random import random
 
 import numpy as np
 
-from spatialmath import Quaternion
 from spatialmath.quaternion import UnitQuaternion
 from spatialmath.base import r2q
 
@@ -95,18 +94,6 @@ def get_paths_in_dir_with_prefix( directory, prefix ):
     fPaths = [os.path.join(directory, f) for f in os.listdir( directory ) if os.path.isfile( os.path.join(directory, f))]
     return [path for path in fPaths if (prefix in str(path))]
 
-
-def get_merged_logs_in_dir_with_prefix( directory, prefix ):
-    """ Merge all logs into one that can be analized easily """
-    pklPaths = get_paths_in_dir_with_prefix( directory, prefix )
-    logMain  = DataLogger()
-    for path in pklPaths:
-        log_i = DataLogger()
-        log_i.load( path )
-        # pprint( log_i.metrics )
-        # print( '\n' )
-        logMain.merge_from( log_i )
-    return logMain.get_snapshot()
 
 
 
@@ -234,74 +221,3 @@ def get_confused_class_reading( label, confProb, orderedLabels ):
     return rtnLabels
 
 
-########## EXPERIMENT STATISTICS ###################################################################
-
-class DataLogger:
-    """ Keep track of when experiments begin and end """
-
-    def __init__( self ):
-        """ Setup stats dict """
-        self.g_BGN   = None
-        self.g_RUN   = False
-        self.metrics = {
-            "N"     : 0,
-            "pass"  : 0,
-            "fail"  : 0,
-            "trials": [],
-        }
-
-    def begin_trial( self ):
-        """ Increment number of trials and set state """
-        self.g_BGN = now()
-        self.g_RUN = True
-        self.metrics['N'] += 1
-        self.events = []
-
-    def log_event( self, event, msg = "" ):
-        """ Log a timestamped event """
-        self.events.append( (now()-self.g_BGN, event, msg,) )
-
-    def end_trial( self, p_pass, infoDict = None ):
-        """ Record makespan and trial info """
-        if infoDict is None:
-            infoDict = {}
-        runDct = {
-            "makespan" : now() - self.g_BGN,
-            "result"   : p_pass,
-            "events"   : list( self.events ),
-        }
-        self.events = []
-        runDct.update( infoDict )
-        self.metrics['trials'].append( runDct )
-        if p_pass:
-            self.metrics['pass'] += 1
-        else:
-            self.metrics['fail'] += 1
-
-
-    def get_snapshot( self ):
-        """ Copy and return the data as it currently exists """
-        return copy.deepcopy( self.metrics )
-
-
-    def merge_from( self, otherLogger ):
-        """ Merge the metrics from another logger """
-        self.metrics['N']    += otherLogger.metrics['N']
-        self.metrics['pass'] += otherLogger.metrics['pass']
-        self.metrics['fail'] += otherLogger.metrics['fail']
-        self.metrics['trials'].extend( otherLogger.metrics['trials'] )
-
-
-    def save( self, prefix = "Experiment-Data" ):
-        """ Serialize recorded stats """
-        fName = str( prefix ) + "__" + str( datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d_%H-%M-%S') ) + ".pkl"
-        with open( fName, 'wb' ) as handle:
-            pickle.dump( self.metrics, handle )
-        print( f"Wrote: {fName}" ) 
-
-
-    def load( self, path ):
-        """ De-serialize recorded stats """
-        with open( path, 'rb' ) as handle:
-            self.metrics = pickle.load( handle )
-        return self.metrics

@@ -109,6 +109,7 @@ class GraspObj:
         self.count  = count # ------------------------------- How many bounding boxes generated this reading?
         self.score  = score if (score is not None) else 0.0 # 2024-07-25: This is for sorting dupes in the planner and is NOT used by PDDLStream
         self.LKG    = False # ------------------------------- Flag: Part of the Last-Known-Good collection?
+        self.SYM    = False
         self.parent : GraspObj = parent # ------------------------------ Parent object this was copied from
 
 
@@ -133,6 +134,25 @@ class GraspObj:
             'index' : self.index,
             'score' : self.score,
         }
+    
+
+    def deep_copy( self ):
+        """ Copy everything but the `parent` """
+        rtnObj = GraspObj()
+        rtnObj.index  = self.index
+        rtnObj.label  = self.label
+        rtnObj.prob   = self.prob
+        rtnObj.pose   = deepcopy( self.pose )
+        ### Distribution ###
+        rtnObj.labels  = deepcopy( self.labels ) # Current belief in each class
+        rtnObj.visited = self.visited # -------------------------------- Flag: Was this belief associated with a relevant reading
+        ### Object Memory ###
+        rtnObj.ts     = self.ts   
+        rtnObj.count  = self.count
+        rtnObj.score  = self.score
+        rtnObj.LKG    = self.LKG  
+        rtnObj.SYM    = self.SYM  
+        rtnObj.parent = None # ------------------------------ Parent object this was copied from
     
 
     def copy( self ):
