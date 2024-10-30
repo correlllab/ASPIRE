@@ -75,6 +75,7 @@ def set_object_env():
         env_sto( "_BLOCK_NAMES", ['grnBlock', 'ornBlock', 'vioBlock', env_var("_NULL_NAME"),] ) 
     elif env_var("_ONLY_EXPERIMENT"):
         env_sto( "_BLOCK_NAMES", ['grnBlock', 'bluBlock', 'ylwBlock', env_var("_NULL_NAME"),] )
+        # env_sto( "_BLOCK_NAMES", ['grnBlock', 'redBlock', 'ylwBlock', env_var("_NULL_NAME"),] )
     else:
         env_sto( "_BLOCK_NAMES", ['redBlock', 'ylwBlock', 'bluBlock', 'grnBlock', 'ornBlock', 'vioBlock', env_var("_NULL_NAME"),] )
 
@@ -83,8 +84,8 @@ def set_object_env():
     env_sto( "_N_CLASSES", len( env_var("_BLOCK_NAMES" )) ) 
     env_sto( "_N_ACTUAL", len( env_var("_ACTUAL_NAMES" )) ) 
 
-    env_sto( "_BLOCK_SCALE", 0.025 ) # Medium Wooden Blocks (YCB)
-    # env_sto( "_BLOCK_SCALE", 0.040 ) # 3D Printed Blocks
+    # env_sto( "_BLOCK_SCALE", 0.025 ) # Medium Wooden Blocks (YCB)
+    env_sto( "_BLOCK_SCALE", 0.040 ) # 3D Printed Blocks
 
     env_sto( "_ACCEPT_POSN_ERR", 0.55*env_var( "_BLOCK_SCALE" ) ) # 0.50 # 0.65 # 0.75 # 0.85 # 1.00
     env_sto( "_Z_SAFE", 0.400 )
@@ -97,10 +98,10 @@ def set_object_env():
 def set_workspace_env():
     """ Set working envelope """
     env_sto( "_SPACE_EXPAND",  0.050 ) 
-    env_sto( "_MIN_X_OFFSET", -0.442 - env_var( "_SPACE_EXPAND" ) )
-    env_sto( "_MAX_X_OFFSET", -0.184 + env_var( "_SPACE_EXPAND" ) )
-    env_sto( "_MIN_Y_OFFSET", -0.356 - env_var( "_SPACE_EXPAND" ) ) 
-    env_sto( "_MAX_Y_OFFSET", -0.150 + env_var( "_SPACE_EXPAND" ) )
+    env_sto( "_MIN_X_OFFSET", -0.468 - env_var( "_SPACE_EXPAND" ) )
+    env_sto( "_MAX_X_OFFSET", -0.103 + env_var( "_SPACE_EXPAND" ) )
+    env_sto( "_MIN_Y_OFFSET", -0.625 - env_var( "_SPACE_EXPAND" ) ) 
+    env_sto( "_MAX_Y_OFFSET", -0.272 + env_var( "_SPACE_EXPAND" ) )
     env_sto( "_MAX_Z_BOUND", env_var( "_BLOCK_SCALE" )*4.0 )
     env_sto( "_X_WRK_SPAN", env_var( "_MAX_X_OFFSET" ) - env_var( "_MIN_X_OFFSET" ) )
     env_sto( "_Y_WRK_SPAN", env_var( "_MAX_Y_OFFSET" ) - env_var( "_MIN_Y_OFFSET" ) )
@@ -112,7 +113,7 @@ def set_robot_env():
     env_sto( "_ROBOT_FREE_SPEED",  0.125 ) 
     env_sto( "_ROBOT_HOLD_SPEED",  0.125 )
     env_sto( "_MOVE_COOLDOWN_S",  0.5 )
-    env_sto( "_BT_UPDATE_HZ",  10.0 )
+    env_sto( "_BT_UPDATE_HZ"  ,  5.0 )
     env_sto( "_BT_ACT_TIMEOUT_S",  20.0 )
 
 

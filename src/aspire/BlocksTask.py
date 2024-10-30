@@ -167,7 +167,7 @@ class BlockFunctions:
                 pLbl = g[1]
                 pPos = g[2]
                 tObj = self.planner.get_labeled_symbol( pLbl )
-                if (tObj is not None) and (euclidean_distance_between_symbols( pPos, tObj ) <= env_var("_WIDE_XY_ACCEPT")):
+                if (tObj is not None) and (euclidean_distance_between_symbols( pPos, tObj ) <= env_var("_PLACE_XY_ACCEPT")):
                     rtnFacts.append( g ) # 
                     print( f"Position Goal MET: {pPos} / {tObj.pose}" )
                 else:
@@ -226,7 +226,7 @@ class BlockFunctions:
             print( f"\t\tSample: {nuPose}" )
             collide = False
             for spot in occuSpots:
-                if euclidean_distance_between_symbols( spot, nuPose ) < ( env_var("_MIN_SEP") ):
+                if euclidean_distance_between_symbols( spot, nuPose ) < ( env_var("_WIDE_XY_ACCEPT") ):
                     collide = True
                     break
             if not collide:
@@ -242,6 +242,7 @@ class BlockFunctions:
     
     def instantiate_conditions( self, robot : UR5_Interface ):
         if not self.planner.check_goal_objects( self.planner.goal, self.planner.symbols ): 
+            print( f"\n\n>>>>>> Goal objects are not present in the world <<<<<<<\n\n" )
             self.planner.status = Status.FAILURE
         else:
             

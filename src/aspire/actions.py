@@ -215,7 +215,7 @@ class BT_Runner:
             self.set_fail( "BT TIMEOUT" )
         if self.p_ended():
             pass_msg_up( self.root )
-            if len( self.msg ) == 0:
+            if (len( self.msg ) == 0) and hasattr( self.root, 'msg' ):
                 self.msg = self.root.msg
             self.display_BT() 
         return self.root.tip().name
@@ -228,6 +228,16 @@ class BT_Runner:
 def grasp_pose_from_obj_pose( anyPose ):
     """ Return the homogeneous coords given [Px,Py,Pz,Ow,Ox,Oy,Oz] """
     rtnPose = extract_pose_as_homog( anyPose )
+    offVec = TCP_XFORM[0:3,3]
+    rtnPose[0:3,0:3] = PROTO_PICK_ROT
+    rtnPose[0:3,3]  += offVec
+    return rtnPose
+
+
+def grasp_pose_from_posn( posn ):
+    """ Return the homogeneous coords given [Px,Py,Pz] """
+    rtnPose = np.eye(4)
+    rtnPose[0:3,3] = posn
     offVec = TCP_XFORM[0:3,3]
     rtnPose[0:3,0:3] = PROTO_PICK_ROT
     rtnPose[0:3,3]  += offVec
