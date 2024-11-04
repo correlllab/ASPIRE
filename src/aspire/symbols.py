@@ -137,6 +137,7 @@ class GraspObj:
 
     def deep_copy( self ):
         """ Copy everything but the `parent` """
+        ### Basic ###
         rtnObj = GraspObj()
         rtnObj.index  = self.index
         rtnObj.label  = self.label
@@ -152,6 +153,8 @@ class GraspObj:
         rtnObj.LKG    = self.LKG  
         rtnObj.SYM    = self.SYM  
         rtnObj.parent = None # ------------------------------ Parent object this was copied from
+        ### Return ###
+        return rtnObj
     
 
     def copy( self ):
