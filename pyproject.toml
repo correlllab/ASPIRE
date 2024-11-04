@@ -21,6 +21,9 @@ dependencies = [
   'numpy',
   'py_trees',
   'psutil',
+  'pyopengl',
+  'pyglet',
+  'vispy',
 ]
 
 [project.scripts]
