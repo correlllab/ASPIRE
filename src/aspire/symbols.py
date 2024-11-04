@@ -66,6 +66,31 @@ def euclidean_distance_between_symbols( sym1, sym2 ):
 
 ########## COMPONENTS ##############################################################################
 
+class CPCD:
+    """ Color Point Cloud Data """
+
+    def __init__( self, data = None, points = None, colors = None ):
+        """ Read CPCD """
+        self.points : np.ndarray = None
+        self.colors : np.ndarray = None
+        if isinstance( data, dict ):
+            self.points = data['points']
+            self.colors = data['colors']
+        else:
+            self.points = np.array( points ) if (points is not None) else list()
+            self.colors = np.array( colors ) if (colors is not None) else list()
+
+    def __len__( self ):
+        """ How many points? """
+        return len( self.points )
+    
+    def copy( self ):
+        """ Make a deep copy """
+        return CPCD(
+            points = self.points.copy(), 
+            colors = self.colors.copy()
+        )
+    
 
 class ObjPose:
     """ Combination of Position and Orientation (Quat) with a Unique Index """
@@ -93,7 +118,8 @@ class GraspObj:
     
     num = count()
 
-    def __init__( self, label = None, pose = None, prob = None, score = None, labels = None, ts = None, count = 0, parent = None ):
+    def __init__( self, label = None, pose = None, prob = None, score = None, labels = None, ts = None, 
+                  count = 0, parent = None, cpcd = None ):
         """ Set components used by planners """
         ### Single Object ###
         self.index  = next( self.num )
@@ -110,6 +136,7 @@ class GraspObj:
         self.LKG    = False # ------------------------------- Flag: Part of the Last-Known-Good collection?
         self.SYM    = False
         self.parent : GraspObj = parent # ------------------------------ Parent object this was copied from
+        self.cpcd   = CPCD( cpcd )
 
 
     def __repr__( self ):
@@ -153,12 +180,14 @@ class GraspObj:
         rtnObj.LKG    = self.LKG  
         rtnObj.SYM    = self.SYM  
         rtnObj.parent = None # ------------------------------ Parent object this was copied from
+        rtnObj.cpcd   = self.cpcd.copy() 
         ### Return ###
         return rtnObj
     
 
     def copy( self ):
         """ Make a copy of this belief """
+        ### Basic ###
         rtnObj = GraspObj()
         rtnObj.labels  = deepcopy( self.labels ) # Current belief in each class
         rtnObj.pose    = self.pose
@@ -167,6 +196,8 @@ class GraspObj:
         rtnObj.count   = self.count # ------------ How many bounding boxes generated this reading?
         rtnObj.score   = self.score # ------------ Quality rating for this information
         rtnObj.LKG     = False # ----------------- Flag: Part of the Last-Known-Good collection?
+        rtnObj.cpcd    = self.cpcd.copy() 
+        ### Return ###
         return rtnObj
     
     
