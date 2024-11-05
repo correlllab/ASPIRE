@@ -162,7 +162,7 @@ class GraspObj:
         }
     
 
-    def deep_copy( self ):
+    def copy( self ):
         """ Copy everything but the `parent` """
         ### Basic ###
         rtnObj = GraspObj()
@@ -185,18 +185,10 @@ class GraspObj:
         return rtnObj
     
 
-    def copy( self ):
+    def copy_child( self ):
         """ Make a copy of this belief """
-        ### Basic ###
-        rtnObj = GraspObj()
-        rtnObj.labels  = deepcopy( self.labels ) # Current belief in each class
-        rtnObj.pose    = self.pose
-        rtnObj.visited = False # ----------------- Flag: Was this belief associated with a relevant reading
-        rtnObj.ts      = self.ts # --------------- When was this reading created? [epoch time]
-        rtnObj.count   = self.count # ------------ How many bounding boxes generated this reading?
-        rtnObj.score   = self.score # ------------ Quality rating for this information
-        rtnObj.LKG     = False # ----------------- Flag: Part of the Last-Known-Good collection?
-        rtnObj.cpcd    = self.cpcd.copy() 
+        rtnObj = self.copy()
+        rtnObj.parent = self
         ### Return ###
         return rtnObj
     
