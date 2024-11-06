@@ -90,6 +90,12 @@ class CPCD:
             points = self.points.copy(), 
             colors = self.colors.copy()
         )
+
+    def transform( self, homog ):
+        """ Transform all of the points with `homog` """
+        pnts = np.hstack( (self.points, np.ones( (len( self.points ),1,) )) )
+        xPts = np.dot( homog, pnts.transpose() )
+        self.points = xPts[:-1,:].transpose()
     
 
 class ObjPose:
