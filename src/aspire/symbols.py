@@ -143,6 +143,7 @@ class GraspObj:
         self.SYM    = False
         self.parent : GraspObj = parent # ------------------------------ Parent object this was copied from
         self.cpcd   = CPCD( cpcd )
+        self.meta   = dict()
 
 
     def __repr__( self ):
@@ -187,6 +188,7 @@ class GraspObj:
         rtnObj.SYM    = self.SYM  
         rtnObj.parent = None # ------------------------------ Parent object this was copied from
         rtnObj.cpcd   = self.cpcd.copy() 
+        rtnObj.meta   = deepcopy( self.meta )
         ### Return ###
         return rtnObj
     
