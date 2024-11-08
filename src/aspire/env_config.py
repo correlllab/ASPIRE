@@ -66,23 +66,23 @@ def set_object_env():
     env_sto( "_ONLY_PRIMARY", False ) 
     env_sto( "_ONLY_SECONDARY", False ) 
     env_sto( "_ONLY_EXPERIMENT", True ) 
+    
 
-    if env_var("_ONLY_RED"):
-        env_sto( "_BLOCK_NAMES", ['redBlock', env_var("_NULL_NAME")] ) 
-    elif env_var("_ONLY_PRIMARY"):
-        env_sto( "_BLOCK_NAMES", ['redBlock', 'ylwBlock', 'bluBlock', env_var("_NULL_NAME"),] )
-    elif env_var("_ONLY_SECONDARY"):
-        env_sto( "_BLOCK_NAMES", ['grnBlock', 'ornBlock', 'vioBlock', env_var("_NULL_NAME"),] ) 
-    elif env_var("_ONLY_EXPERIMENT"):
-        env_sto( "_BLOCK_NAMES", ['grnBlock', 'bluBlock', 'ylwBlock', env_var("_NULL_NAME"),] )
-        # env_sto( "_BLOCK_NAMES", ['grnBlock', 'redBlock', 'ylwBlock', env_var("_NULL_NAME"),] )
-    else:
-        env_sto( "_BLOCK_NAMES", ['redBlock', 'ylwBlock', 'bluBlock', 'grnBlock', 'ornBlock', 'vioBlock', env_var("_NULL_NAME"),] )
+    env_sto( "_BLOCK_NAMES", [
+        # 'redBlock', 
+        'ylwBlock', 
+        'bluBlock', 
+        'grnBlock', 
+        # 'ornBlock', 
+        # 'vioBlock', 
+        env_var("_NULL_NAME"),] )
+        
 
     env_sto( "_POSE_DIM", 7 ) 
     env_sto( "_ACTUAL_NAMES", env_var( "_BLOCK_NAMES" )[:-1] ) 
     env_sto( "_N_CLASSES", len( env_var("_BLOCK_NAMES" )) ) 
     env_sto( "_N_ACTUAL", len( env_var("_ACTUAL_NAMES" )) ) 
+
 
     # env_sto( "_BLOCK_SCALE", 0.025 ) # Medium Wooden Blocks (YCB)
     env_sto( "_BLOCK_SCALE", 0.040 ) # 3D Printed Blocks
@@ -97,14 +97,15 @@ def set_object_env():
 
 def set_workspace_env():
     """ Set working envelope """
+    env_sto( "_Z_TABLE"     ,  0.032 ) 
     env_sto( "_SPACE_EXPAND",  0.050 ) 
     env_sto( "_MIN_X_OFFSET", -0.468 - env_var( "_SPACE_EXPAND" ) )
     env_sto( "_MAX_X_OFFSET", -0.103 + env_var( "_SPACE_EXPAND" ) )
     env_sto( "_MIN_Y_OFFSET", -0.625 - env_var( "_SPACE_EXPAND" ) ) 
     env_sto( "_MAX_Y_OFFSET", -0.272 + env_var( "_SPACE_EXPAND" ) )
-    env_sto( "_MAX_Z_BOUND", env_var( "_BLOCK_SCALE" )*4.0 )
-    env_sto( "_X_WRK_SPAN", env_var( "_MAX_X_OFFSET" ) - env_var( "_MIN_X_OFFSET" ) )
-    env_sto( "_Y_WRK_SPAN", env_var( "_MAX_Y_OFFSET" ) - env_var( "_MIN_Y_OFFSET" ) )
+    env_sto( "_MAX_Z_BOUND" , env_var( "_BLOCK_SCALE" )*4.0 )
+    env_sto( "_X_WRK_SPAN"  , env_var( "_MAX_X_OFFSET" ) - env_var( "_MIN_X_OFFSET" ) )
+    env_sto( "_Y_WRK_SPAN"  , env_var( "_MAX_Y_OFFSET" ) - env_var( "_MIN_Y_OFFSET" ) )
 
 
 def set_robot_env():

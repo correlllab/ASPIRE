@@ -188,10 +188,11 @@ class BlockFunctions:
                     zSep  = posUp[2,3] - posDn[2,3] # Signed value
                     # if ((xySep <= 1.65*env_var("_BLOCK_SCALE")) and (1.65*env_var("_BLOCK_SCALE") >= zSep >= 0.9*env_var("_BLOCK_SCALE"))):
 
-                    print( f"\nSupport Check: {xySep}, {(xySep <= env_var('_WIDE_XY_ACCEPT'))} and {zSep}, {( env_var('_WIDE_Z_ABOVE') >= zSep >= env_var('_LKG_SEP'))}\n")
+                    # print( f"\nSupport Check: {xySep}, {(xySep <= env_var('_WIDE_XY_ACCEPT'))} and {zSep}, {( env_var('_WIDE_Z_ABOVE') >= zSep >= env_var('_LKG_SEP'))}\n")
+                    print( f"\nSupport Check: {xySep}, {(xySep <= env_var('_WIDE_XY_ACCEPT'))} and {zSep}, {( env_var('_WIDE_Z_ABOVE') >= zSep >= env_var('_ACCEPT_POSN_ERR'))}\n")
 
 
-                    if ((xySep <= env_var("_WIDE_XY_ACCEPT")) and ( env_var("_WIDE_Z_ABOVE") >= zSep >= env_var("_LKG_SEP"))):
+                    if ((xySep <= env_var("_WIDE_XY_ACCEPT")) and ( env_var("_WIDE_Z_ABOVE") >= zSep >= env_var("_ACCEPT_POSN_ERR"))):
                         supDices.add(i)
                         rtnFacts.extend([
                             ('Supported', lblUp, lblDn,),
