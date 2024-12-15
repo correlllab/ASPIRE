@@ -24,6 +24,7 @@ dependencies = [
   'pyopengl',
   'pyglet',
   'vispy',
+  'setuptools',
 ]
 
 [project.scripts]
