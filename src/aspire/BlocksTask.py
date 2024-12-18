@@ -13,8 +13,6 @@ from aspire.env_config import set_blocks_env, env_var, env_sto
 
 set_blocks_env()
 
-_poseGrn = np.eye(4)
-_poseGrn[0:3,3] = [ env_var("_MIN_X_OFFSET") +env_var("_X_WRK_SPAN")/2.0, env_var("_MIN_Y_OFFSET")+env_var("_Y_WRK_SPAN")/2.0, 0.5*env_var("_BLOCK_SCALE"), ]
 
 from aspire.symbols import ObjPose, extract_pose_as_homog, euclidean_distance_between_symbols
 from aspire.utils import diff_norm
@@ -27,7 +25,7 @@ from aspire.SymPlanner import SymPlanner
 def set_block_poses_env():
     """ Hard-coded poses for the blocks problem """
 
-    env_sto( "_trgtGrn", ObjPose( _poseGrn ) ) 
+    
     env_sto( "_N_XTRA_SPOTS", 3 ) 
 
 
@@ -171,7 +169,7 @@ class BlockFunctions:
                     rtnFacts.append( g ) # 
                     print( f"Position Goal MET: {pPos} / {tObj.pose}" )
                 else:
-                    print( f"Position Goal NOT MET: {pPos} / {tObj.pose}" )
+                    print( f"Position Goal NOT MET: {pPos} / {tObj.pose}, {euclidean_distance_between_symbols( pPos, tObj )} / {env_var('_PLACE_XY_ACCEPT')}" )
         # B. No need to ground the rest
 
         ## Support Predicates && Blocked Status ##
