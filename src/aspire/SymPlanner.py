@@ -204,7 +204,7 @@ class SymPlanner:
         except Exception as ex:
             print( f"SOLVER FAULT:\n{format_exc()}\n" )
             self.status = Status.FAILURE
-            print_exc()
+            # print_exc()
             solution = (None, None, None)
             self.noSoln += 1 # DEATH MONITOR
 
@@ -221,9 +221,9 @@ class SymPlanner:
         elif (plan is not None) and (len( plan ) == 0) and (cost < 0.0001):
             self.status = Status.SUCCESS
         else:
-            self.noSoln += 1 # DEATH MONITOR
-            # self.logger.log_event( "NO SOLUTION" )
-            self.status = Status.FAILURE
+            self.noSoln   += 1 # DEATH MONITOR
+            self.currPlan = None
+            self.status   = Status.FAILURE
     
 
     def p_fact_match_noisy( self, pred ):
