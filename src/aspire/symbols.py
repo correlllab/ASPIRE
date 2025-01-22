@@ -169,7 +169,7 @@ class GraspObj:
         }
     
 
-    def copy( self ):
+    def copy( self, copyParent = False ):
         """ Copy everything but the `parent` """
         ### Basic ###
         rtnObj = GraspObj()
@@ -186,7 +186,7 @@ class GraspObj:
         rtnObj.score  = self.score
         rtnObj.LKG    = self.LKG  
         rtnObj.SYM    = self.SYM  
-        rtnObj.parent = None # ------------------------------ Parent object this was copied from
+        rtnObj.parent = None if (not copyParent) else self.parent 
         rtnObj.cpcd   = self.cpcd.copy() 
         rtnObj.meta   = deepcopy( self.meta )
         ### Return ###
