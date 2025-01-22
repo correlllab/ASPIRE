@@ -148,14 +148,24 @@ class GraspObj:
         self.meta   = dict()
 
 
+    def format_labels( self ):
+        """ Make the labels manageable to read on the CLI """
+        rtnStr = "{"
+        for k, v in self.labels.items():
+            rtnStr += f"{k}: {v:.4f}, "
+        rtnStr = rtnStr[:-1]
+        rtnStr += "}"
+        return rtnStr
+
+
     def __repr__( self ):
         """ Text representation of noisy reading """
         if self.label != env_var("_NULL_NAME"):
-            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Score: {str(self.score)}>"
+            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Score: {self.score:.4f}>"
         elif len( self.labels ):
-            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.labels)}, Score: {str(self.score)}>"
+            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {self.format_labels()}, Score: {self.score:.4f}>"
         else:
-            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Score: {str(self.score)}>"
+            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Score: {self.score:.4f}>"
     
     
     def get_dict( self ):
