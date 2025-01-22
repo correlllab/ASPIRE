@@ -296,19 +296,46 @@ class MoveFree( GroundedAction ):
 
         # ?poseBgn ?poseEnd
         poseBgn, poseEnd = args
+        if poseBgn is None:
+            poseBgn = robot.get_tcp_pose()
+
         if not suppressGrasp:
-            poseEnd = grasp_pose_from_obj_pose( poseEnd )
+            poseBgn = grasp_pose_from_obj_pose( extract_pose_as_homog( poseBgn ) )
+            poseEnd = grasp_pose_from_obj_pose( extract_pose_as_homog( poseEnd ) )
+        else:
+            poseBgn = extract_pose_as_homog( poseBgn )
+            poseEnd = extract_pose_as_homog( poseEnd )
 
         if name is None:
             name = f"Move Free from {poseBgn} --to-> {poseEnd}"
 
         super().__init__( args, robot, name )
+        
+        psnMid1 = np.array( poseBgn[0:3,3] )
+        psnMid2 = np.array( poseEnd[0:3,3] )
+        psnMid1[2] = env_var("_Z_SAFE")
+        psnMid2[2] = env_var("_Z_SAFE")
+        poseMd1 = np.eye(4) 
+        poseMd2 = np.eye(4)
+        poseMd1[0:3,0:3] = PROTO_PICK_ROT
+        poseMd2[0:3,0:3] = PROTO_PICK_ROT
+        poseMd1[0:3,3] = psnMid1
+        poseMd2[0:3,3] = psnMid2
+        
+        transportMotn = Sequence( name = "Move Arm Safely", memory = True )
+        transportMotn.add_children( [
+            Move_Arm( poseMd1, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
+            Move_Arm( poseMd2, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
+            Move_Arm( poseEnd, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
+        ] )
 
-        self.poseEnd = extract_pose_as_homog( poseEnd )
+        self.add_child( transportMotn )
+
+        # self.poseEnd = extract_pose_as_homog( poseEnd )
                 
-        self.add_child(
-            Move_Arm( self.poseEnd, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") )
-        )
+        # self.add_child(
+        #     Move_Arm( self.poseEnd, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") )
+        # )
 
 
 

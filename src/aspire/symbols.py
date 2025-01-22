@@ -94,6 +94,8 @@ class CPCD:
     def transform( self, homog ):
         """ Transform all of the points with `homog` """
         pnts = np.hstack( (self.points, np.ones( (len( self.points ),1,) )) )
+        # print( type(homog), type(pnts.transpose()) )
+        # print( homog.keys() )
         xPts = np.dot( homog, pnts.transpose() )
         self.points = xPts[:-1,:].transpose()
     
