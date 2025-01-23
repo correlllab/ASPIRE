@@ -23,7 +23,7 @@ from py_trees.common import Status
 
 ### ASPIRE ###
 from aspire.symbols import ( ObjPose, GraspObj, extract_pose_as_homog, euclidean_distance_between_symbols, env_var, )
-from aspire.actions import ( display_PDLS_plan, get_BT_plan, get_BT_plan_until_block_change, )
+from aspire.actions.pdls_behaviors import ( display_PDLS_plan, get_BT_plan, get_BT_plan_until_block_change, )
 
 ### ASPIRE::PDDLStream ### 
 from aspire.pddlstream.pddlstream.utils import read, INF
