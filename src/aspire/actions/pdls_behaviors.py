@@ -11,12 +11,11 @@ from time import sleep
 import numpy as np
 
 import py_trees
-from py_trees.behaviour import Behaviour
 from py_trees.common import Status
 from py_trees.composites import Sequence
 
 ### Local ###
-from magpie_control.BT import Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK, Set_Gripper
+from magpie_control.BT import BasicBehavior, Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK, Set_Gripper
 from aspire.symbols import extract_pose_as_homog, env_var
 
 
@@ -45,63 +44,8 @@ TCP_XFORM = np.array([
 MP2BB[ PAUSE_KEY ] = False
 
 
-########## BASE CLASS ##############################################################################
 
-
-class BasicBehavior( Behaviour ):
-    """ Abstract class for repetitive housekeeping """
-    
-    def __init__( self, name = None, ctrl = None ):
-        """ Set name to the child class name unless otherwise specified """
-        if name is None:
-            super().__init__( name = str( self.__class__.__name__  ) )
-        else:
-            super().__init__( name = name )
-        self.ctrl  = ctrl
-        self.msg   = ""
-        self.logger.debug( f"[{self.name}::__init__()]" )
-        if self.ctrl is None:
-            self.logger.warning( f"{self.name} is NOT conntected to a robot controller!" )
-        self.count = 0
-        
-
-    def setup(self):
-        """ Virtual setup for base class """
-        self.logger.debug( f"[{self.name}::setup()]" )          
-        
-        
-    def initialise( self ):
-        """ Run first time behaviour is ticked or not RUNNING.  Will be run again after SUCCESS/FAILURE. """
-        self.status = Status.RUNNING # Do not let the behavior idle in INVALID
-        self.logger.debug( f"[{self.name}::initialise()]" ) 
-        self.count = 0         
-
-        
-    def terminate( self, new_status ):
-        """ Log how the behavior terminated """
-        self.status = new_status
-        self.logger.debug( f"[{self.name}::terminate().terminate()][{self.status}->{new_status}]" )
-        
-        
-    def update( self ):
-        """ Return true in all cases """
-        self.status = Status.SUCCESS
-        return self.status
-    
-
-    def stall( self, Nwait ):
-        """ Run at least `Nwait` ticks """
-        rtnStat = Status.INVALID
-        if self.count < Nwait:
-            rtnStat = Status.RUNNING
-        else:
-            rtnStat = Status.SUCCESS
-        self.count += 1
-        return rtnStat
-    
-
-
-########## BASIC BEHAVIORS #########################################################################
+########## BEHAVIOR HELPERS ########################################################################
 
 ### Constants ###
 LIBBT_TS_S       = 0.25
