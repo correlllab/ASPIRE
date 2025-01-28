@@ -22,8 +22,9 @@ import numpy as np
 from py_trees.common import Status
 
 ### ASPIRE ###
-from aspire.symbols import ( ObjPose, GraspObj, extract_pose_as_homog, euclidean_distance_between_symbols, env_var, )
-from aspire.actions.pdls_behaviors import ( display_PDLS_plan, get_BT_plan, get_BT_plan_until_block_change, )
+from aspire.symbols import ( ObjPose, GraspObj, extract_pose_as_homog, euclidean_distance_between_symbols, 
+                             env_var, )
+from aspire.actions.pdls_behaviors import ( PlanParser, )
 
 ### ASPIRE::PDDLStream ### 
 from aspire.pddlstream.pddlstream.utils import read, INF
@@ -39,14 +40,7 @@ class SymPlanner:
     """ Basic task planning loop """
 
     ##### Init ############################################################
-
-
-    def set_update_funcs( self, percFunc, chckFunc ):
-        """ Set the update functions """
-        self.percFunc = percFunc
-        self.chckFunc = chckFunc
-
-
+    
     def reset_symbols( self ):
         """ Erase belief memory """
         self.symbols : list[GraspObj] = list() # ------- Determinized beliefs
@@ -63,7 +57,7 @@ class SymPlanner:
         self.action = None
 
 
-    def __init__( self, domainPath, streamPath ):
+    def __init__( self, domainPath, streamPath, planParser = None ):
         """ Create a pre-determined collection of poses and plan skeletons """
         self.reset_symbols()
         self.reset_state()
@@ -72,6 +66,7 @@ class SymPlanner:
         self.nonLim = 10
         self.domainPath = domainPath 
         self.streamPath = streamPath 
+        self.parser : PlanParser = PlanParser() if (planParser is None) else planParser
 
 
     ##### Stream Helpers ##################################################
@@ -212,11 +207,19 @@ class SymPlanner:
 
         if (plan is not None) and len( plan ):
             self.status = Status.RUNNING
-            display_PDLS_plan( plan )
+
+            # display_PDLS_plan( plan )
+            self.parser.display_PDLS_plan( plan )
+
             self.currPlan = plan
             print( f"\nPlanning Task, Planner Type: {type( self )}\n" )
-            self.nxtAct   = get_BT_plan_until_block_change( plan, self, env_var("_UPDATE_PERIOD_S"), robot )
-            self.action   = get_BT_plan( plan, self, env_var("_UPDATE_PERIOD_S"), robot )
+            
+            # self.action   = get_BT_plan( plan, self, env_var("_UPDATE_PERIOD_S"), robot )
+            self.action   = self.parser.parse_PDLS_plan( plan )
+
+            # self.nxtAct   = get_BT_plan_until_block_change( plan, self, env_var("_UPDATE_PERIOD_S"), robot )
+            self.nxtAct   = self.parser.parse_PDLS_action( plan )
+            
             self.noSoln   = 0 # DEATH MONITOR
         elif (plan is not None) and (len( plan ) == 0) and (cost < 0.0001):
             self.status = Status.SUCCESS
