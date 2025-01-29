@@ -126,6 +126,7 @@ class GraspObj:
     
     num = count()
 
+
     def __init__( self, label = None, pose = None, prob = None, score = None, labels = None, ts = None, 
                   count = 0, parent = None, cpcd = None ):
         """ Set components used by planners """
@@ -146,6 +147,8 @@ class GraspObj:
         self.parent : GraspObj = parent # ------------------------------ Parent object this was copied from
         self.cpcd   = CPCD( cpcd )
         self.meta   = dict()
+        self.meta['distHist'] = list()
+        self.meta['poseHist'] = list()
 
 
     def format_labels( self ):
