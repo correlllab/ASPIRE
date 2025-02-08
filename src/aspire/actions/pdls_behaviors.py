@@ -15,8 +15,7 @@ from py_trees.common import Status
 from py_trees.composites import Sequence
 
 ### Local ###
-from magpie_control.BT import ( BasicBehavior, Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK, 
-                                Set_Gripper, MP2BB, )
+from magpie_control.BT import ( Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK, Set_Gripper, )
 from aspire.symbols import extract_pose_as_homog, env_var
 
 
@@ -37,105 +36,6 @@ TCP_XFORM = np.array([
     [0, 0, 1, _GRASP_OFFSET_Z ],
     [0, 0, 0, 1               ],
 ])
-
-
-
-
-
-########## BEHAVIOR HELPERS ########################################################################
-
-### Constants ###
-LIBBT_TS_S       = 0.25
-DEFAULT_TRAN_ERR = 0.010 # 0.002
-DEFAULT_ORNT_ERR = 3*np.pi/180.0
-
-def pass_msg_up( bt : BasicBehavior, failBelow = False ):
-    if bt.parent is not None:
-        if bt.status == Status.FAILURE:
-            if (bt.parent.status != Status.FAILURE) or (len( bt.parent.msg ) == 0):
-                setattr( bt.parent, "msg", bt.msg )
-                pass_msg_up( bt.parent, True )
-            else:
-                pass_msg_up( bt.parent )
-        elif failBelow:
-            setattr( bt.parent, "msg", bt.msg )
-            pass_msg_up( bt.parent, True )
-
-
-def connect_BT_to_robot( bt : BasicBehavior, robot ):
-    """ Assign `robot` controller to `bt` and recursively to all nodes below """
-    if hasattr( bt, 'ctrl' ):
-        bt.ctrl = robot
-    if len( bt.children ):
-        for child in bt.children:
-            connect_BT_to_robot( child, robot )
-
-
-
-########## BT-PLANNER INTERFACE ####################################################################
-
-class BT_Runner:
-    """ Run a BT with checks """
-
-    def __init__( self, root, tickHz = 4.0, limit_s = 20.0 ):
-        """ Set root node reference and running parameters """
-        self.root   = root
-        self.status = Status.INVALID
-        self.freq   = tickHz
-        self.period = 1.0 / tickHz
-        self.msg    = ""
-        self.Nlim   = int( limit_s * tickHz )
-        self.i      = 0
-        self.tLast  = now()
-
-
-    def setup_BT_for_running( self ):
-        """ Prep BT for running """
-        self.root.setup_with_descendants()
-
-
-    def display_BT( self ):
-        """ Draw the BT along with the status of all the nodes """
-        print( py_trees.display.unicode_tree( root = self.root, show_status = True ) )
-
-
-    def p_ended( self ):
-        """ Has the BT ended? """
-        return self.status in ( Status.FAILURE, Status.SUCCESS )
-    
-
-    def set_fail( self, msg = "DEFAULT MSG: STOPPED" ):
-        """ Handle external signals to halt BT execution """
-        self.status = Status.FAILURE
-        self.msg    = msg
-
-
-    def per_sleep( self ):
-        """ Sleep for the remainder of the period """
-        # NOTE: Run this AFTER BT and associated work have finished
-        tNow = now()
-        elap = (tNow - self.tLast)
-        if (elap < self.period):
-            sleep( self.period - elap )
-        self.tLast = now()
-
-
-    def tick_once( self ):
-        """ Run one simulation step """
-        ## Advance BT ##
-        if not self.p_ended():
-            self.root.tick_once()
-        self.status = self.root.status
-        self.i += 1
-        ## Check Conditions ##
-        if (self.i >= self.Nlim) and (not self.p_ended()):
-            self.set_fail( "BT TIMEOUT" )
-        if self.p_ended():
-            pass_msg_up( self.root )
-            if (len( self.msg ) == 0) and hasattr( self.root, 'msg' ):
-                self.msg = self.root.msg
-            self.display_BT() 
-        return self.root.tip().name
 
 
 
