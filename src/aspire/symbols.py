@@ -74,8 +74,8 @@ class CPCD:
         self.points : np.ndarray = None
         self.colors : np.ndarray = None
         if isinstance( data, dict ):
-            self.points = data['points']
-            self.colors = data['colors']
+            self.points = np.array( data['points'] )
+            self.colors = np.array( data['colors'] )
         else:
             self.points = np.array( points ) if (points is not None) else list()
             self.colors = np.array( colors ) if (colors is not None) else list()
