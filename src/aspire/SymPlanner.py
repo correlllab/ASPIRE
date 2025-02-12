@@ -24,7 +24,7 @@ from py_trees.common import Status
 ### ASPIRE ###
 from aspire.symbols import ( ObjPose, GraspObj, extract_pose_as_homog, euclidean_distance_between_symbols, 
                              env_var, )
-from aspire.actions.pdls_behaviors import ( PlanParser, )
+from aspire.actions.pdls_behaviors import ( PlanParser, Plan, )
 
 ### ASPIRE::PDDLStream ### 
 from aspire.pddlstream.pddlstream.utils import read, INF
@@ -53,8 +53,8 @@ class SymPlanner:
         self.task   = None # --------- Current task definition
         self.goal   = tuple() # ------ Current goal specification
         self.grasp  = list() # ------- ? NOT USED ?
-        self.nxtAct = None
-        self.action = None
+        self.nxtAct : Plan = None
+        self.action : Plan = None
 
 
     def __init__( self, domainPath, streamPath, planParser = None ):
