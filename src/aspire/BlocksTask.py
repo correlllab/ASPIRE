@@ -115,7 +115,8 @@ class BlockFunctions:
                 testPose  = rand_table_pose()
                 print( f"\t\tSample: {testPose}" )
                 for sym in self.planner.symbols:
-                    if euclidean_distance_between_symbols( testPose, sym ) < ( env_var("_MIN_SEP") ):
+                    # if euclidean_distance_between_symbols( testPose, sym ) < ( env_var("_MIN_SEP") ):
+                    if euclidean_distance_between_symbols( testPose, sym ) < ( env_var("_WIDE_PLACEMENT") ):
                         collide = True
                         break
                 if not collide:

@@ -11,6 +11,7 @@ import numpy as np
 def env_sto( varKey, varVal ):
     """ Serialize and save the env var """
     # https://stackoverflow.com/a/30469744
+    # NOTE: Storage limit per var is 131kB, per this source: https://askubuntu.com/a/1385554
     os.environ[ varKey ] = codecs.encode( pickle.dumps( varVal ), "base64").decode()
 
 
