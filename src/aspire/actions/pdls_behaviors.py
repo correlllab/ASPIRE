@@ -10,12 +10,9 @@ from time import sleep
 ### Special ###
 import numpy as np
 
-import py_trees
-from py_trees.common import Status
-from py_trees.composites import Sequence
-
 ### Local ###
-from magpie_control.BT import ( Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK, Set_Gripper, )
+from magpie_control.BT import ( Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK, Set_Gripper, 
+                                SequenceP, )
 from aspire.symbols import extract_pose_as_homog, env_var
 
 
@@ -64,10 +61,10 @@ def grasp_pose_from_posn( posn ):
 
 ########## BLOCKS DOMAIN BEHAVIOR TREES ############################################################
 
-class GroundedAction( Sequence ):
+class GroundedAction( SequenceP ):
     """ This is the parent class for all actions available to the planner """
 
-    def __init__( self, args = None, robot = None, name = "Grounded Sequence" ):
+    def __init__( self, args = None, robot = None, name = "Grounded SequenceP" ):
         """ Init BT """
         super().__init__( name = name, memory = True )
         self.args    = args if (args is not None) else list() # Symbols involved in this action
@@ -113,7 +110,7 @@ class MoveFree( GroundedAction ):
         poseMd1[0:3,3] = psnMid1
         poseMd2[0:3,3] = psnMid2
         
-        transportMotn = Sequence( name = "Move Arm Safely", memory = True )
+        transportMotn = SequenceP( name = "Move Arm Safely", memory = True )
         transportMotn.add_children( [
             Move_Arm( poseMd1, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
             Move_Arm( poseMd2, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
@@ -155,7 +152,7 @@ class MoveFree_w_Pause( GroundedAction ):
         poseMd1[0:3,3] = psnMid1
         poseMd2[0:3,3] = psnMid2
         
-        transportMotn = Sequence( name = "Move Arm Safely", memory = True )
+        transportMotn = SequenceP( name = "Move Arm Safely", memory = True )
         transportMotn.add_children( [
             Move_Arm( poseMd1, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
             Move_Arm( poseMd2, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
@@ -224,13 +221,13 @@ class MoveHolding( GroundedAction ):
         poseMd1[0:3,3] = psnMid1
         poseMd2[0:3,3] = psnMid2
     
-        checkedMotion = Sequence( name = "Move Without Dropping", memory = False )
+        checkedMotion = SequenceP( name = "Move Without Dropping", memory = False )
         dropChecker   = Gripper_Aperture_OK( 
             env_var("_BLOCK_SCALE"), 
             margin_m = env_var("_BLOCK_SCALE")*0.50, 
             name = "Check Holding", ctrl = robot  
         )
-        transportMotn = Sequence( name = "Move Object", memory = True )
+        transportMotn = SequenceP( name = "Move Object", memory = True )
         transportMotn.add_children( [
             Move_Arm( poseMd1, ctrl = robot, linSpeed = env_var("_ROBOT_HOLD_SPEED") ),
             Move_Arm( poseMd2, ctrl = robot, linSpeed = env_var("_ROBOT_HOLD_SPEED") ),
@@ -302,7 +299,7 @@ class Stack( GroundedAction ):
 
 ########## PLANS ###################################################################################
 
-class Plan( Sequence ):
+class Plan( SequenceP ):
     """ Special BT `Sequence` with assigned priority, cost, and confidence """
 
     def __init__( self ):
