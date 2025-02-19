@@ -102,7 +102,8 @@ def set_workspace_env():
     # env_sto( "_Z_TABLE"     ,  0.032 ) 
     env_sto( "_Z_TABLE"     ,  0.000 ) 
 
-    env_sto( "_SPACE_EXPAND",  0.050 ) 
+    # env_sto( "_SPACE_EXPAND",  0.050 ) 
+    env_sto( "_SPACE_EXPAND",  0.100 ) 
     env_sto( "_MIN_X_OFFSET", -0.468 - env_var( "_SPACE_EXPAND" ) )
     env_sto( "_MAX_X_OFFSET", -0.103 + env_var( "_SPACE_EXPAND" ) )
     env_sto( "_MIN_Y_OFFSET", -0.625 - env_var( "_SPACE_EXPAND" ) ) 
