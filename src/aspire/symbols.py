@@ -164,11 +164,11 @@ class GraspObj:
     def __repr__( self ):
         """ Text representation of noisy reading """
         if self.label != env_var("_NULL_NAME"):
-            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Score: {self.score:.4f}>"
+            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Prob: {self.prob:.4f}>"
         elif len( self.labels ):
             return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {self.format_labels()}, Score: {self.score:.4f}>"
         else:
-            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Score: {self.score:.4f}>"
+            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Prob: {self.prob:.4f}>"
     
     
     def get_dict( self ):
