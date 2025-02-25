@@ -90,6 +90,12 @@ class CPCD:
             points = self.points.copy(), 
             colors = self.colors.copy()
         )
+    
+    def merge( self, other ):
+        """ Add points of anothe cloud into this cloud """
+        self.points = np.vstack( (self.points, other.points) )
+        self.colors = np.vstack( (self.colors, other.colors) )
+
 
     def transform( self, homog ):
         """ Transform all of the points with `homog` """

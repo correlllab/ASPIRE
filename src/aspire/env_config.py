@@ -70,8 +70,8 @@ def set_object_env():
     
 
     env_sto( "_BLOCK_NAMES", [
-        # 'redBlock', 
-        'ylwBlock', 
+        'redBlock', 
+        # 'ylwBlock', 
         'bluBlock', 
         'grnBlock', 
         # 'ornBlock', 
