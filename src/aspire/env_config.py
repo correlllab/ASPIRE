@@ -132,7 +132,8 @@ def set_camera_env():
     env_sto( "_D405_FOV_H_DEG",  84.0 )
     env_sto( "_D405_FOV_V_DEG",  58.0 )
     env_sto( "_D405_FOV_D_M",  0.920 )
-    env_sto( "_MIN_CAM_PCD_DIST_M", 0.075 + env_var( "_BLOCK_SCALE" ) * len( env_var( "_ACTUAL_NAMES" ) ) )
+    # env_sto( "_MIN_CAM_PCD_DIST_M", 0.075 + env_var( "_BLOCK_SCALE" ) * len( env_var( "_ACTUAL_NAMES" ) ) )
+    env_sto( "_MIN_CAM_PCD_DIST_M", 0.075 + env_var( "_BLOCK_SCALE" ) )
 
 
 
