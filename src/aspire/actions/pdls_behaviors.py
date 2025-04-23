@@ -11,8 +11,8 @@ from time import sleep
 import numpy as np
 
 ### Local ###
-from magpie_control.BT import ( Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK, Set_Gripper, 
-                                SequenceP, )
+from magpie_control.BT import ( Move_Arm, Open_Gripper, Close_Gripper, Gripper_Aperture_OK, 
+                                Set_Gripper, SequenceP, )
 from aspire.symbols import extract_pose_as_homog, env_var
 
 
@@ -253,9 +253,6 @@ class Place( GroundedAction ):
             name = f"Place {label} at {pose.pose} onto {support}"
         super().__init__( args, robot, name )
 
-        # self.add_child( 
-        #     Open_Gripper( ctrl = robot  )
-        # )
 
         self.add_children([ 
             Set_Gripper( env_var("_BLOCK_SCALE")*2.0, name = "Release Object", ctrl = robot ),
