@@ -155,6 +155,23 @@ class GraspObj:
         self.meta   = dict()
         self.meta['distHist'] = list()
         self.meta['poseHist'] = list()
+        self.meta['lockPose'] = None
+
+
+    def lock_pose( self, lockPose : np.ndarray ):
+        """ Prevent update nudges to the pose """
+        self.pose = ObjPose( lockPose )
+        self.meta['lockPose'] = np.array( lockPose )
+
+
+    def unlock_pose( self ):
+        """ Allow update nudges to the pose """
+        self.meta['lockPose'] = None
+
+
+    def p_pose_locked( self ):
+        """ Did we prevent update nudges to the pose """
+        return (self.meta['lockPose'] is not None)
 
 
     def format_labels( self ):
