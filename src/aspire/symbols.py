@@ -1,3 +1,4 @@
+from __future__ import annotations
 ########## INIT ####################################################################################
 
 ##### Imports #####
@@ -91,11 +92,27 @@ class CPCD:
             colors = self.colors.copy()
         )
     
+    def calc_aabb( self ):
+        """ Calculate the Axis-Aligned Bounding Box """
+        lo = np.amin( self.points, axis = 0 )
+        hi = np.amax( self.points, axis = 0 )
+        return np.vstack( (lo, hi,) )
+    
+    def calc_aa_volume( self ):
+        """ Calculate the volume of the Axis-Aligned Bounding Box """
+        bb = self.calc_aabb()
+        rtnVol = 1.0
+        for i in range( self.points.shape[1] ):
+            rtnVol *= (bb[1,i]-bb[0,i])
+        return rtnVol
+    
     def merge( self, other ):
         """ Add points of anothe cloud into this cloud """
+        prevVol = self.calc_aa_volume()
         self.points = np.vstack( (self.points, other.points) )
         self.colors = np.vstack( (self.colors, other.colors) )
-
+        aftrVol = self.calc_aa_volume()
+        print( f"`CPCD.merge()`: Volume changed by a factor of {aftrVol/prevVol:0.5f}" )
 
     def transform( self, homog ):
         """ Transform all of the points with `homog` """
@@ -129,9 +146,7 @@ class ObjPose:
 
 class GraspObj:
     """ The concept of a named object at a pose """
-    
     num = count()
-
 
     def __init__( self, label = None, pose = None, prob = None, score = None, labels = None, ts = None, 
                   count = 0, parent = None, cpcd = None ):
@@ -157,6 +172,39 @@ class GraspObj:
         self.meta['poseHist'] = list()
         self.meta['lockPose'] = None
 
+    def get_dict( self ):
+        """ Return a verison of the `GraspObj` suitable for a TXT file """
+        return {
+            'name'  : self.__class__.__name__,
+            'time'  : self.ts,
+            'label' : self.label,
+            'labels': self.labels,
+            'pose'  : extract_pose_as_homog( self.pose ).tolist(),
+            'index' : self.index,
+            'prob'  : self.prob,
+            'score' : self.score,
+        }
+
+    @staticmethod
+    def from_dict( dct ):
+        rtnObj = GraspObj( 
+            label  = dct['label'], 
+            pose   = np.array( dct['pose'] ), 
+            prob   = dct['prob'], 
+            score  = dct['score'], 
+            labels = dct['labels'], 
+            ts     = dct['time']
+        )
+        rtnObj.index = dct['index']
+        return rtnObj 
+
+
+    def add_source( self, other : GraspObj ):
+        """ Log a summarized input to the present state """
+        if 'inputs' not in self.meta:
+            self.meta['inputs'] = list()
+        self.meta['inputs'].append( other.get_dict() )
+
 
     def lock_pose( self, lockPose : np.ndarray ):
         """ Prevent update nudges to the pose """
@@ -175,9 +223,12 @@ class GraspObj:
 
 
     def format_labels( self ):
-        """ Make the labels manageable to read on the CLI """
+        """ Make the labels manageable to read on the CLI, and in a consistent order """
         rtnStr = "{"
-        for k, v in self.labels.items():
+        keys = list( self.labels.keys() )
+        keys.sort()
+        for k in keys:
+            v = self.labels[k]
             rtnStr += f"{k}: {v:.4f}, "
         rtnStr = rtnStr[:-1]
         rtnStr += "}"
@@ -194,17 +245,7 @@ class GraspObj:
             return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Prob: {self.prob:.4f}>"
     
     
-    def get_dict( self ):
-        """ Return a verison of the `GraspObj` suitable for a TXT file """
-        return {
-            'name'  : self.__class__.__name__,
-            'time'  : now(),
-            'ts'    : self.ts,
-            'labels': self.labels,
-            'pose'  : extract_pose_as_homog( self.pose ).tolist(),
-            'index' : self.index,
-            'score' : self.score,
-        }
+    
     
 
     def copy( self, copyParent = False ):
@@ -246,18 +287,7 @@ class GraspObj:
         return rtnObj
     
 
-    def get_dict( self ):
-        """ Return a verison of the `GraspObj` suitable for a TXT file """
-        return {
-            'name'  : self.__class__.__name__,
-            'time'  : now(),
-            'label' : self.label,
-            'labels': self.labels,
-            'pose'  : extract_pose_as_homog( self.pose ).tolist(),
-            'index' : self.index,
-            'prob'  : self.prob,
-            'score' : self.score,
-        }
+    
 
 
 
