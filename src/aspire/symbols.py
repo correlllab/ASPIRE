@@ -244,9 +244,6 @@ class GraspObj:
         else:
             return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Prob: {self.prob:.4f}>"
     
-    
-    
-    
 
     def copy( self, copyParent = False ):
         """ Copy everything but the `parent` """
