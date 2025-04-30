@@ -112,9 +112,9 @@ class MoveFree( GroundedAction ):
         
         transportMotn = SequenceP( name = "Move Arm Safely", memory = True )
         transportMotn.add_children( [
-            Move_Arm( poseMd1, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
-            Move_Arm( poseMd2, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
-            Move_Arm( poseEnd, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
+            Move_Arm( poseMd1, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED"), linAccel = env_var("_ROBOT_LIN_ACCEL") ),
+            Move_Arm( poseMd2, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED"), linAccel = env_var("_ROBOT_LIN_ACCEL") ),
+            Move_Arm( poseEnd, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED"), linAccel = env_var("_ROBOT_LIN_ACCEL") ),
         ] )
 
         self.add_child( transportMotn )
@@ -154,9 +154,9 @@ class MoveFree_w_Pause( GroundedAction ):
         
         transportMotn = SequenceP( name = "Move Arm Safely", memory = True )
         transportMotn.add_children( [
-            Move_Arm( poseMd1, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
-            Move_Arm( poseMd2, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
-            Move_Arm( poseEnd, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED") ),
+            Move_Arm( poseMd1, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED"), linAccel = env_var("_ROBOT_LIN_ACCEL") ),
+            Move_Arm( poseMd2, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED"), linAccel = env_var("_ROBOT_LIN_ACCEL") ),
+            Move_Arm( poseEnd, ctrl = robot, linSpeed = env_var("_ROBOT_FREE_SPEED"), linAccel = env_var("_ROBOT_LIN_ACCEL") ),
         ] )
 
         self.add_child( transportMotn )
@@ -229,9 +229,9 @@ class MoveHolding( GroundedAction ):
         )
         transportMotn = SequenceP( name = "Move Object", memory = True )
         transportMotn.add_children( [
-            Move_Arm( poseMd1, ctrl = robot, linSpeed = env_var("_ROBOT_HOLD_SPEED") ),
-            Move_Arm( poseMd2, ctrl = robot, linSpeed = env_var("_ROBOT_HOLD_SPEED") ),
-            Move_Arm( poseEnd, ctrl = robot, linSpeed = env_var("_ROBOT_HOLD_SPEED") ),
+            Move_Arm( poseMd1, ctrl = robot, linSpeed = env_var("_ROBOT_HOLD_SPEED"), linAccel = env_var("_ROBOT_LIN_ACCEL") ),
+            Move_Arm( poseMd2, ctrl = robot, linSpeed = env_var("_ROBOT_HOLD_SPEED"), linAccel = env_var("_ROBOT_LIN_ACCEL") ),
+            Move_Arm( poseEnd, ctrl = robot, linSpeed = env_var("_ROBOT_HOLD_SPEED"), linAccel = env_var("_ROBOT_LIN_ACCEL") ),
         ] )
         checkedMotion.add_children([
             dropChecker,
@@ -256,12 +256,12 @@ class Place( GroundedAction ):
 
         self.add_children([ 
             Set_Gripper( env_var("_BLOCK_SCALE")*2.0, name = "Release Object", ctrl = robot ),
-            Close_Gripper( ctrl = robot ),
-            Gripper_Aperture_OK( 
-                env_var("_BLOCK_SCALE"), 
-                margin_m = env_var("_BLOCK_SCALE")*0.50, 
-                name = "Check Placed", ctrl = robot  
-            ),
+            # Close_Gripper( ctrl = robot ),
+            # Gripper_Aperture_OK( 
+            #     env_var("_BLOCK_SCALE"), 
+            #     margin_m = env_var("_BLOCK_SCALE")*0.50, 
+            #     name = "Check Placed", ctrl = robot  
+            # ),
             Open_Gripper( ctrl = robot ),
         ])
 
@@ -283,12 +283,12 @@ class Stack( GroundedAction ):
 
         self.add_children([ 
             Set_Gripper( env_var("_BLOCK_SCALE")*2.0, name = "Release Object", ctrl = robot ),
-            Close_Gripper( ctrl = robot ),
-            Gripper_Aperture_OK( 
-                env_var("_BLOCK_SCALE"), 
-                margin_m = env_var("_BLOCK_SCALE")*0.50, 
-                name = "Check Placed", ctrl = robot  
-            ),
+            # Close_Gripper( ctrl = robot ),
+            # Gripper_Aperture_OK( 
+            #     env_var("_BLOCK_SCALE"), 
+            #     margin_m = env_var("_BLOCK_SCALE")*0.50, 
+            #     name = "Check Placed", ctrl = robot  
+            # ),
             Open_Gripper( ctrl = robot ),
         ])
 

@@ -1,6 +1,6 @@
 ########## INIT ####################################################################################
 import os
-from random import random
+from random import random, choice
 
 import numpy as np
 from py_trees.common import Status
@@ -17,6 +17,7 @@ set_blocks_env()
 from aspire.symbols import ObjPose, extract_pose_as_homog, euclidean_distance_between_symbols
 from aspire.utils import diff_norm
 from aspire.SymPlanner import SymPlanner
+from aspire.actions.pdls_behaviors import Plan, MoveFree, Pick, MoveHolding, Place
 
 
 
@@ -240,6 +241,7 @@ class BlockFunctions:
             ])
         return rtnFacts
     
+
     def instantiate_conditions( self, robot : UR5_Interface ):
         if not self.planner.check_goal_objects( self.planner.goal, self.planner.symbols ): 
             print( f"\n\n>>>>>> Goal objects are not present in the world <<<<<<<\n\n" )
@@ -277,3 +279,40 @@ class BlockFunctions:
                 for sym in self.planner.facts:
                     print( f"\t{sym}" )
                 print()
+
+
+    def HACK_space_repair_plan( self, robot ):
+        """ Plan a move that separates the closest blocks """
+        self.planner.facts.extend( self.allocate_table_swap_space() )
+        N    = len( self.planner.symbols )
+        clst = None
+        dMin = 1e9
+        for i in range(N-1):
+            sym_i = self.planner.symbols[i]
+            for j in range(i+1, N):
+                sym_j = self.planner.symbols[i]
+                d_ij  = euclidean_distance_between_symbols( sym_i, sym_j )
+                if d_ij < dMin:
+                    dMin = d_ij
+                    clst = [sym_i, sym_j,]
+        symMov = choice( clst )
+        opnSpt = list()
+        bgnPos = None
+        for fact in self.planner.facts:
+            if fact[0] == 'Free':
+                opnSpt.append( fact[1] )
+            elif fact[0] == 'AtPose':
+                bgnPos = fact[1]
+        posMov = choice( opnSpt )
+        rtnPlan = Plan()
+        rtnPlan.add_children( [
+            MoveFree( [bgnPos, symMov.pose], robot = robot ),
+            Pick( [symMov.label, symMov.pose, "??TABLE??"], robot = robot ),
+            MoveHolding( [symMov.pose, posMov, symMov.label], robot = robot ),
+            Place( [symMov.label, posMov, "??TABLE??"], robot = robot ),
+        ] )
+        self.planner.nxtAct   = rtnPlan
+        # self.planner.currPlan = rtnPlan
+
+
+
