@@ -54,7 +54,9 @@ def extract_position( obj_or_arr ):
 def p_symbol_inside_workspace_bounds( obj_or_arr ):
     """ Return True if inside the bounding box, Otherwise return False """
     posn = extract_position( obj_or_arr )      
-    return (env_var("_MIN_X_OFFSET") <= posn[0] <= env_var("_MAX_X_OFFSET")) and (env_var("_MIN_Y_OFFSET") <= posn[1] <= env_var("_MAX_Y_OFFSET")) and (0.0 < posn[2] <= env_var("_MAX_Z_BOUND"))
+    pBox = (env_var("_MIN_X_OFFSET") <= posn[0] <= env_var("_MAX_X_OFFSET")) and (env_var("_MIN_Y_OFFSET") <= posn[1] <= env_var("_MAX_Y_OFFSET")) and (0.0 < posn[2] <= env_var("_MAX_Z_BOUND"))
+    pFar = np.linalg.norm( posn[:2] ) >= env_var("_ROBOT_PADDING_M")
+    return (pBox and pFar)
 
 
 def euclidean_distance_between_symbols( sym1, sym2 ):
@@ -126,6 +128,12 @@ class CPCD:
 class ObjPose:
     """ Combination of Position and Orientation (Quat) with a Unique Index """
     num = count()
+
+    @staticmethod
+    def dummy_pose():
+        rtnPose = ObjPose()
+        rtnPose.index = -1
+        return rtnPose
 
     def __init__( self, pose = None ):
         self.pose  = extract_pose_as_homog( pose ) if (pose is not None) else np.eye(4)

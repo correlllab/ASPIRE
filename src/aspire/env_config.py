@@ -118,9 +118,11 @@ def set_robot_env():
     set_workspace_env()
     env_sto( "_ROBOT_FREE_SPEED",  0.125 ) 
     env_sto( "_ROBOT_HOLD_SPEED",  0.125 )
-    env_sto( "_MOVE_COOLDOWN_S",  0.5 )
-    env_sto( "_BT_UPDATE_HZ"  ,  5.0 )
-    env_sto( "_BT_ACT_TIMEOUT_S",  20.0 )
+    env_sto( "_ROBOT_LIN_ACCEL" ,  0.500 )
+    env_sto( "_MOVE_COOLDOWN_S" ,  0.5 )
+    env_sto( "_BT_UPDATE_HZ"    ,  5.0 )
+    env_sto( "_BT_ACT_TIMEOUT_S", 20.0 )
+    env_sto( "_ROBOT_PADDING_M" ,  0.250 )
 
 
 

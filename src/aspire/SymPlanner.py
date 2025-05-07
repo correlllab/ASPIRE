@@ -12,7 +12,7 @@ Contacts: {james.watson-2@colorado.edu,}
 ### Standard ###
 import sys, time, os
 now = time.time
-from pprint import pprint
+from pprint import pprint, pformat
 from random import random
 from traceback import print_exc, format_exc
 from datetime import datetime
@@ -142,6 +142,24 @@ class SymPlanner:
             if fact[0] == 'GraspObj' and (euclidean_distance_between_symbols( homog, fact[2] ) <= env_var("_ACCEPT_POSN_ERR")):
                 return fact[2]
         return ObjPose( homog )
+    
+
+    def get_goal_objects( self ):
+        """ Get a list of goal objects as PDDL """
+        if str( self.goal[0] ).lower() == 'and':
+            rtnLst = list()
+            for g in self.goal[1:]:
+                if isinstance( g, (tuple, list) ):
+                    prdName = g[0]
+                    if prdName == 'GraspObj':
+                        rtnLst.append( g )
+                    elif prdName == 'Supported':
+                        rtnLst.append( ('GraspObj', g[1], ObjPose.dummy_pose()) )
+            return rtnLst
+        else:
+            raise ValueError( f"GOAL TOO SIMPLE?\n{pformat( self.goal )}" )
+
+
     
 
     def check_goal_objects( self, goal, symbols : list[GraspObj] ):
