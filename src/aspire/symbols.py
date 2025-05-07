@@ -129,6 +129,12 @@ class ObjPose:
     """ Combination of Position and Orientation (Quat) with a Unique Index """
     num = count()
 
+    @staticmethod
+    def dummy_pose():
+        rtnPose = ObjPose()
+        rtnPose.index = -1
+        return rtnPose
+
     def __init__( self, pose = None ):
         self.pose  = extract_pose_as_homog( pose ) if (pose is not None) else np.eye(4)
         self.index = next( self.num )
@@ -154,10 +160,16 @@ class GraspObj:
                   count = 0, parent = None, cpcd = None ):
         """ Set components used by planners """
         ### Single Object ###
-        self.index  = next( self.num )
-        self.label  = label if (label is not None) else env_var("_NULL_NAME")
-        self.prob   = prob if (prob is not None) else 0.0 # 2024-07-22: This is for sorting dupes in the planner and is NOT used by PDDLStream
-        self.pose   = pose if (pose is not None) else ObjPose( np.eye(4) )
+        self.index = next( self.num )
+        self.label = label if (label is not None) else env_var("_NULL_NAME")
+        self.prob  = prob if (prob is not None) else 0.0 # 2024-07-22: This is for sorting dupes in the planner and is NOT used by PDDLStream
+
+        self.pose = pose if (pose is not None) else ObjPose( np.eye(4) )
+        if isinstance( self.pose, list ):
+            self.pose = np.array( self.pose )
+        if isinstance( self.pose, np.ndarray ):
+            self.pose = ObjPose( self.pose )
+
         ### Distribution ###
         self.labels : dict = labels if (labels is not None) else {} # Current belief in each class
         self.visited = False # -------------------------------- Flag: Was this belief associated with a relevant reading
