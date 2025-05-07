@@ -296,7 +296,7 @@ class GraspObj:
         return rtnObj
     
 
-    
+next( GraspObj.num ) # The table has id 0
 
 
 
