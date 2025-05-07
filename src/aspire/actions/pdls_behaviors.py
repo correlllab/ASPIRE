@@ -167,8 +167,8 @@ class Pick( GroundedAction ):
     """ Add object to the gripper payload """
     def __init__( self, args, robot = None, name = None ):
 
-        # ?label ?pose ?prevSupport
-        label, pose, prevSupport = args
+        # ?label ?pose ?prevSupport ?idUp ?idDn
+        label, pose, prevSupport, idUp, idDn = args
         
         if name is None:
             name = f"Pick {label} at {pose.pose} from {prevSupport}"
@@ -184,8 +184,8 @@ class Unstack( GroundedAction ):
     """ Add object to the gripper payload """
     def __init__( self, args, robot = None, name = None ):
 
-        # ?label ?pose ?prevSupport
-        label, pose, prevSupport = args
+        # ?label ?pose ?prevSupport ?idUp ?idDn
+        label, pose, prevSupport, idUp, idDn = args
         
         if name is None:
             name = f"Unstack {label} at {pose.pose} from {prevSupport}"
@@ -202,7 +202,7 @@ class MoveHolding( GroundedAction ):
     def __init__( self, args, robot = None, name = None ):
 
         # ?poseBgn ?poseEnd ?label
-        poseBgn, poseEnd, label = args
+        poseBgn, poseEnd, label, id_ = args
 
         if name is None:
             name = f"Move Holding {label} --to-> {poseEnd}"
@@ -246,8 +246,8 @@ class Place( GroundedAction ):
     """ Let go of gripper payload """
     def __init__( self, args, robot = None, name = None ):
 
-        # ?label ?pose ?support
-        label, pose, support = args
+        # ?label ?pose ?support ?idUp ?idDn
+        label, pose, support, idUp, idDn = args
         
         if name is None:
             name = f"Place {label} at {pose.pose} onto {support}"
@@ -270,8 +270,8 @@ class Stack( GroundedAction ):
     """ Let go of gripper payload """
     def __init__( self, args, robot = None, name = None ):
 
-        # ?labelUp ?poseUp ?labelDn
-        labelUp, poseUp, labelDn = args
+        # ?labelUp ?poseUp ?labelDn ?idUp ?idDn
+        labelUp, poseUp, labelDn, idUp, idDn = args
         
         if name is None:
             name = f"Stack {labelUp} at {poseUp.pose} onto {labelDn}"

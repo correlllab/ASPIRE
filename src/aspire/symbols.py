@@ -149,10 +149,11 @@ class GraspObj:
     num = count()
 
     def __init__( self, label = None, pose = None, prob = None, score = None, labels = None, ts = None, 
-                  count = 0, parent = None, cpcd = None ):
+                  count = 0, parent = None, cpcd = None, ident = None ):
         """ Set components used by planners """
         ### Single Object ###
         self.index  = next( self.num )
+        self.ident  = ident if (ident is not None) else self.index
         self.label  = label if (label is not None) else env_var("_NULL_NAME")
         self.prob   = prob if (prob is not None) else 0.0 # 2024-07-22: This is for sorting dupes in the planner and is NOT used by PDDLStream
         self.pose   = pose if (pose is not None) else ObjPose( np.eye(4) )
@@ -176,6 +177,7 @@ class GraspObj:
         """ Return a verison of the `GraspObj` suitable for a TXT file """
         return {
             'name'  : self.__class__.__name__,
+            'id'    : self.ident,
             'time'  : self.ts,
             'label' : self.label,
             'labels': self.labels,
@@ -193,7 +195,8 @@ class GraspObj:
             prob   = dct['prob'], 
             score  = dct['score'], 
             labels = dct['labels'], 
-            ts     = dct['time']
+            ts     = dct['time'],
+            ident  = dct['id']
         )
         rtnObj.index = dct['index']
         return rtnObj 
@@ -238,11 +241,11 @@ class GraspObj:
     def __repr__( self ):
         """ Text representation of noisy reading """
         if self.label != env_var("_NULL_NAME"):
-            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Prob: {self.prob:.4f}>"
+            return f"<GraspObj {self.ident}:{self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Prob: {self.prob:.4f}>"
         elif len( self.labels ):
-            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {self.format_labels()}, Score: {self.score:.4f}>"
+            return f"<GraspObj {self.ident}:{self.index} @ {extract_position( self.pose )}, Class: {self.format_labels()}, Score: {self.score:.4f}>"
         else:
-            return f"<GraspObj {self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Prob: {self.prob:.4f}>"
+            return f"<GraspObj {self.ident}:{self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Prob: {self.prob:.4f}>"
     
 
     def copy( self, copyParent = False ):
@@ -250,6 +253,7 @@ class GraspObj:
         ### Basic ###
         rtnObj = GraspObj()
         rtnObj.index  = self.index
+        rtnObj.ident  = self.ident
         rtnObj.label  = self.label
         rtnObj.prob   = self.prob
         rtnObj.pose   = deepcopy( self.pose )

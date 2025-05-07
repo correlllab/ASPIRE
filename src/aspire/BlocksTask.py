@@ -181,6 +181,8 @@ class BlockFunctions:
                 if i != j:
                     lblUp = sym_i.label
                     lblDn = sym_j.label
+                    idUp  = sym_i.ident
+                    idDn  = sym_j.ident
                     posUp = extract_pose_as_homog( sym_i )
                     posDn = extract_pose_as_homog( sym_j )
                     xySep = diff_norm( posUp[0:2,3], posDn[0:2,3] )
@@ -194,14 +196,14 @@ class BlockFunctions:
                     if ((xySep <= env_var("_WIDE_XY_ACCEPT")) and ( env_var("_WIDE_Z_ABOVE") >= zSep >= env_var("_ACCEPT_POSN_ERR"))):
                         supDices.add(i)
                         rtnFacts.extend([
-                            ('Supported', lblUp, lblDn,),
-                            ('Blocked', lblDn,),
+                            ('Supported', lblUp, lblDn, idUp, idDn),
+                            ('Blocked', idDn,),
                             ('PoseAbove', self.planner.get_grounded_fact_pose_or_new( posUp ), lblDn,),
                         ])
         for i, sym_i in enumerate( self.planner.symbols ):
             if i not in supDices:
                 rtnFacts.extend( [
-                    ('Supported', sym_i.label, 'table',),
+                    ('Supported', sym_i.label, 'table', sym_i.ident, 0 ),
                     ('PoseAbove', self.planner.get_grounded_fact_pose_or_new( sym_i ), 'table',),
                 ] )
         ## Where the robot at? ##
@@ -262,7 +264,7 @@ class BlockFunctions:
                 blockPose = self.planner.get_grounded_fact_pose_or_new( sym )
 
                 # print( f"`blockPose`: {blockPose}" )
-                self.planner.facts.append( ('GraspObj', sym.label, blockPose,) )
+                self.planner.facts.append( ('GraspObj', sym.label, blockPose, sym.ident,) )
                 if not self.planner.p_grounded_fact_pose( blockPose ):
                     self.planner.facts.append( ('Waypoint', blockPose,) )
 
