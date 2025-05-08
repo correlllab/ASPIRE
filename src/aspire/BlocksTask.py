@@ -296,11 +296,11 @@ class BlockFunctions:
                     recur_goal( sg, factLst )
             else:
                 ## Copy `Waypoint`s present in goals ##
-                if g[0] == 'GraspObj':
-                    if not facts_have_wp( factLst, g[2] ):
-                        factLst.append( ('Waypoint', g[2],) )
-                        if abs( extract_pose_as_homog(g[2])[2,3] - env_var("_BLOCK_SCALE")) < env_var("_ACCEPT_POSN_ERR"):
-                            factLst.append( ('PoseAbove', g[2], 'table') )
+                if goal[0] == 'GraspObj':
+                    if not facts_have_wp( factLst, goal[2] ):
+                        factLst.append( ('Waypoint', goal[2],) )
+                        if abs( extract_pose_as_homog(goal[2])[2,3] - env_var("_BLOCK_SCALE")) < env_var("_ACCEPT_POSN_ERR"):
+                            factLst.append( ('PoseAbove', goal[2], 'table') )
 
 
             
