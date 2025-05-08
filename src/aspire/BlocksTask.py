@@ -125,6 +125,16 @@ class BlockFunctions:
             yield (ObjPose(testPose),)
 
         return stream_func
+    
+
+    # def get_towered_predicate_stream( self ):
+    #     """ Return a function that returns tower predicates """
+
+    #     def stream_func( *args ):
+    #         """ A function that returns towers """
+
+    #         if env_var("_VERBOSE"):
+    #             print( f"\nEvaluate PLACEMENT POSE stream with args: {args}\n" )
 
 
     def get_free_placement_test( self ):

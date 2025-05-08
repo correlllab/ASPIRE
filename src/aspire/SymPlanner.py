@@ -274,18 +274,42 @@ class SymPlanner:
     def validate_goal_noisy( self, goal ):
         """ Check if the system believes the goal is met """
 
-        print( f"\n\n##### Validating goal #####" )
-        if goal[0] == 'and':
-            for g in goal[1:]:
-                print( f"Checking goal {g}:", end=" " )
-                if not self.p_fact_match_noisy( g ):
-                    print( "UNMET\n\n" )
+        def recur( goal ):
+            """ Dispatch to intersection or union """
+            if str( goal[0] ).lower() == 'and':
+                print( f"Dispatch intersection:", end=" ... " )
+                return intersecton( goal[1:] ) 
+            elif str( goal[0] ).lower() == 'or':   
+                print( f"Dispatch union:", end=" ... " )
+                return union( goal[1:] ) 
+            else:
+                print( f"Checking goal {goal}:", end=" " )
+                self.p_fact_match_noisy( goal )
+
+        def intersecton( pList ):
+            """ Return True only if ALL are True """
+            for g in pList:
+                if not recur( g ):
+                    print( "SUBGOAL UNMET\n\n" )
                     return False
-                print( "MET" )
-            print( "GOAL MET\n\n" )
+            print( "SUBGOAL MET\n\n" )
             return True
-        else:
-            raise ValueError( f"Unexpected goal format!: {goal}" )
+        
+        def union( pList ):
+            """ Return False only if ALL are False """
+            for g in pList:
+                print( f"Checking goal {g}:", end=" " )
+                if recur( g ):
+                    print( "SUBGOAL MET\n\n" )
+                    return True
+            print( "SUBGOAL UNMET\n\n" )
+            return False
+
+        print( f"\n\n##### Validating goal #####" )
+        return recur( goal )
+
+        
+        
 
 
     
