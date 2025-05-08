@@ -170,20 +170,33 @@ class BlockFunctions:
                 rtnFacts.append( ('Holding', graspedLabel,) )
         else:
             rtnFacts.append( ('HandEmpty',) )
-        ## Obj@Loc Predicates ##
-        # A. Check goals
-        for g in self.planner.goal[1:]:
-            if g[0] == 'GraspObj':
-                pLbl = g[1]
-                pPos = g[2]
-                tObj = self.planner.get_labeled_symbol( pLbl )
-                if (tObj is not None) and (euclidean_distance_between_symbols( pPos, tObj ) <= env_var("_PLACE_XY_ACCEPT")):
-                    rtnFacts.append( g ) # 
-                    print( f"Position Goal MET: {pPos} / {tObj.pose}" )
-                else:
-                    print( f"Position Goal NOT MET: {pPos} / {tObj.pose}, {euclidean_distance_between_symbols( pPos, tObj )} / {env_var('_PLACE_XY_ACCEPT')}" )
-        # B. No need to ground the rest
 
+
+        def p_compound( goal ):
+            """ Return True if we are descending a level """
+            return (str( goal[0] ).lower() == 'and') or (str( goal[0] ).lower() == 'or')
+        
+
+        def recur_goal( goal, factLst : list ):
+            if p_compound( goal ):
+                for sg in goal[1:]:
+                    recur_goal( sg, factLst )
+            else:
+                ## Obj@Loc Predicates ##
+                # A. Check goals
+                if goal[0] == 'GraspObj':
+                    pLbl = goal[1]
+                    pPos = goal[2]
+                    tObj = self.planner.get_labeled_symbol( pLbl )
+                    if (tObj is not None) and (euclidean_distance_between_symbols( pPos, tObj ) <= env_var("_PLACE_XY_ACCEPT")):
+                        factLst.append( goal ) # 
+                        print( f"Position Goal MET: {pPos} / {tObj.pose}" )
+                    else:
+                        print( f"Position Goal NOT MET: {pPos} / {tObj.pose}, {euclidean_distance_between_symbols( pPos, tObj )} / {env_var('_PLACE_XY_ACCEPT')}" )
+                # B. No need to ground the rest
+
+        recur_goal( self.planner.goal, rtnFacts )
+            
         ## Support Predicates && Blocked Status ##
         # Check if `sym_i` is supported by `sym_j`, blocking `sym_j`, NOTE: Table supports not checked
         supDices = set([])
@@ -258,42 +271,65 @@ class BlockFunctions:
     
 
     def instantiate_conditions( self, robot : UR5_Interface ):
+        """ Setup problem! """
         if not self.planner.check_goal_objects( self.planner.goal, self.planner.symbols ): 
             print( f"\n\n>>>>>> Goal objects are not present in the world <<<<<<<\n\n" )
             self.planner.status = Status.FAILURE
-        else:
-            
-            self.planner.facts = [ ('Base', 'table',) ] 
+            return None
+        
+        def p_compound( goal ):
+            """ Return True if we are descending a level """
+            return (str( goal[0] ).lower() == 'and') or (str( goal[0] ).lower() == 'or')
+        
+        def facts_have_wp( factLst : list[tuple], wp : ObjPose ):
+            """ Check if we have stored this Waypoint """
+            for fact in factLst:
+                if fact[0] == 'Waypoint':
+                    if euclidean_distance_between_symbols( fact[0], wp ) <= env_var("_PLACE_XY_ACCEPT"):
+                        return True
+            return False
 
-            ## Copy `Waypoint`s present in goals ##
-            for g in self.planner.goal[1:]:
+        
+        def recur_goal( goal, factLst : list ):
+            if p_compound( goal ):
+                for sg in goal[1:]:
+                    recur_goal( sg, factLst )
+            else:
+                ## Copy `Waypoint`s present in goals ##
                 if g[0] == 'GraspObj':
-                    self.planner.facts.append( ('Waypoint', g[2],) )
-                    if abs( extract_pose_as_homog(g[2])[2,3] - env_var("_BLOCK_SCALE")) < env_var("_ACCEPT_POSN_ERR"):
-                        self.planner.facts.append( ('PoseAbove', g[2], 'table') )
+                    if not facts_have_wp( factLst, g[2] ):
+                        factLst.append( ('Waypoint', g[2],) )
+                        if abs( extract_pose_as_homog(g[2])[2,3] - env_var("_BLOCK_SCALE")) < env_var("_ACCEPT_POSN_ERR"):
+                            factLst.append( ('PoseAbove', g[2], 'table') )
 
-            ## Ground the Blocks ##
-            for sym in self.planner.symbols:
-                self.planner.facts.append( ('Graspable', sym.label,) )
 
-                blockPose = self.planner.get_grounded_fact_pose_or_new( sym )
+            
+        self.planner.facts = [ ('Base', 'table',), ] 
 
-                # print( f"`blockPose`: {blockPose}" )
-                self.planner.facts.append( ('GraspObj', sym.label, blockPose, sym.ident,) )
-                if not self.planner.p_grounded_fact_pose( blockPose ):
-                    self.planner.facts.append( ('Waypoint', blockPose,) )
+        recur_goal( self.planner.goal, self.planner.facts )
 
-            ## Fetch Relevant Facts ##
-            self.planner.facts.extend( self.ground_relevant_predicates( robot ) )
+        ## Ground the Blocks ##
+        for sym in self.planner.symbols:
+            self.planner.facts.append( ('Graspable', sym.label,) )
 
-            ## Populate Spots for Block Movements ##, 2024-04-25: Injecting this for now, Try a stream later ...
-            self.planner.facts.extend( self.allocate_table_swap_space( env_var("_N_XTRA_SPOTS") ) )
+            blockPose = self.planner.get_grounded_fact_pose_or_new( sym )
 
-            if env_var("_VERBOSE"):
-                print( f"\n### Initial Symbols ###" )
-                for sym in self.planner.facts:
-                    print( f"\t{sym}" )
-                print()
+            # print( f"`blockPose`: {blockPose}" )
+            self.planner.facts.append( ('GraspObj', sym.label, blockPose, sym.ident,) )
+            if not self.planner.p_grounded_fact_pose( blockPose ):
+                self.planner.facts.append( ('Waypoint', blockPose,) )
+
+        ## Fetch Relevant Facts ##
+        self.planner.facts.extend( self.ground_relevant_predicates( robot ) )
+
+        ## Populate Spots for Block Movements ##, 2024-04-25: Injecting this for now, Try a stream later ...
+        self.planner.facts.extend( self.allocate_table_swap_space( env_var("_N_XTRA_SPOTS") ) )
+
+        if env_var("_VERBOSE"):
+            print( f"\n### Initial Symbols ###" )
+            for sym in self.planner.facts:
+                print( f"\t{sym}" )
+            print()
 
 
     def HACK_space_repair_plan( self, robot ):

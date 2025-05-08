@@ -207,11 +207,11 @@ class SymPlanner:
         self.nxtAct = None
         self.action = None
 
-        print( f"About to plan task, WHAT IS ME? {type(self)}" )
+        # print( f"About to plan task, WHAT IS ME? {type(self)}" )
 
         self.task = self.pddlstream_from_problem( pdls_stream_map = pdls_stream_map )
 
-        # self.logger.log_event( "Begin Solver" )
+        print( "Begin Solver" )
 
         try:
             
@@ -220,7 +220,7 @@ class SymPlanner:
                 algorithm      = "adaptive", 
                 unit_costs     = True, 
                 unit_efforts   = True, 
-                reorder        = True,
+                reorder        = False, # True
                 initial_complexity = 2,
             )
 
