@@ -146,9 +146,22 @@ class SymPlanner:
 
     def get_goal_objects( self ):
         """ Get a list of goal objects as PDDL """
-        if str( self.goal[0] ).lower() == 'and':
+        # WARNING, ASSUMPTION: GOAL OBJECTS ARE THE SAME IN EVERY PERMUTATION
+
+        def p_compound( goal ):
+            """ Return True if we are descending a level """
+            return (str( goal[0] ).lower() == 'and') or (str( goal[0] ).lower() == 'or')
+
+        goal = self.goal
+        while p_compound( goal ):
+            if p_compound( goal[1] ):
+                goal = goal[1]
+            else:
+                goal = goal[1:]
+        
+        if len( goal ):
             rtnLst = list()
-            for g in self.goal[1:]:
+            for g in goal:
                 if isinstance( g, (tuple, list) ):
                     prdName = g[0]
                     if prdName == 'GraspObj':
@@ -157,7 +170,7 @@ class SymPlanner:
                         rtnLst.append( ('GraspObj', g[1], ObjPose.dummy_pose()) )
             return rtnLst
         else:
-            raise ValueError( f"GOAL TOO SIMPLE?\n{pformat( self.goal )}" )
+            raise ValueError( f"BAD GOAL?\n{pformat( self.goal )}" )
 
 
     
