@@ -188,11 +188,14 @@ class BlockFunctions:
                     pLbl = goal[1]
                     pPos = goal[2]
                     tObj = self.planner.get_labeled_symbol( pLbl )
-                    if (tObj is not None) and (euclidean_distance_between_symbols( pPos, tObj ) <= env_var("_PLACE_XY_ACCEPT")):
-                        factLst.append( goal ) # 
-                        print( f"Position Goal MET: {pPos} / {tObj.pose}" )
+                    if (tObj is not None):
+                        if (euclidean_distance_between_symbols( pPos, tObj ) <= env_var("_PLACE_XY_ACCEPT")):
+                            factLst.append( goal ) # 
+                            print( f"Position Goal MET: {pPos} / {tObj.pose}" )
+                        else:
+                            print( f"Position Goal NOT MET: {pPos} / {tObj.pose}, {euclidean_distance_between_symbols( pPos, tObj )} / {env_var('_PLACE_XY_ACCEPT')}" )
                     else:
-                        print( f"Position Goal NOT MET: {pPos} / {tObj.pose}, {euclidean_distance_between_symbols( pPos, tObj )} / {env_var('_PLACE_XY_ACCEPT')}" )
+                        print( f"No current symbol matching {pPos}" )
                 # B. No need to ground the rest
 
         recur_goal( self.planner.goal, rtnFacts )
@@ -285,10 +288,9 @@ class BlockFunctions:
             """ Check if we have stored this Waypoint """
             for fact in factLst:
                 if fact[0] == 'Waypoint':
-                    if euclidean_distance_between_symbols( fact[0], wp ) <= env_var("_PLACE_XY_ACCEPT"):
+                    if euclidean_distance_between_symbols( fact[1], wp ) <= env_var("_PLACE_XY_ACCEPT"):
                         return True
             return False
-
         
         def recur_goal( goal, factLst : list ):
             if p_compound( goal ):
@@ -301,8 +303,6 @@ class BlockFunctions:
                         factLst.append( ('Waypoint', goal[2],) )
                         if abs( extract_pose_as_homog(goal[2])[2,3] - env_var("_BLOCK_SCALE")) < env_var("_ACCEPT_POSN_ERR"):
                             factLst.append( ('PoseAbove', goal[2], 'table') )
-
-
             
         self.planner.facts = [ ('Base', 'table',), ] 
 
@@ -315,7 +315,8 @@ class BlockFunctions:
             blockPose = self.planner.get_grounded_fact_pose_or_new( sym )
 
             # print( f"`blockPose`: {blockPose}" )
-            self.planner.facts.append( ('GraspObj', sym.label, blockPose, sym.ident,) )
+            # self.planner.facts.append( ('GraspObj', sym.label, blockPose, sym.ident,) )
+            self.planner.facts.append( ('GraspObj', sym.label, blockPose, ) )
             if not self.planner.p_grounded_fact_pose( blockPose ):
                 self.planner.facts.append( ('Waypoint', blockPose,) )
 

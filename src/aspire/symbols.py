@@ -34,15 +34,18 @@ def extract_np_array_pose( obj_or_arr ):
 def extract_pose_as_homog( obj_or_arr, noRot = False ):
     """ Return only a copy of the homogeneous coordinates of the 3D pose """
     bgnPose = extract_np_array_pose( obj_or_arr )
-    if len( bgnPose ) == 4:
-        rtnPose = bgnPose
-    elif len( bgnPose ) == 16:
-        rtnPose = np.array( bgnPose ).reshape( (4,4,) )
+    if bgnPose is not None:
+        if len( bgnPose ) == 4:
+            rtnPose = bgnPose
+        elif len( bgnPose ) == 16:
+            rtnPose = np.array( bgnPose ).reshape( (4,4,) )
+        else:
+            raise ValueError( f"`extract_pose_as_homog`: Poorly formed pose:\n{bgnPose}" )
+        if noRot:
+            rtnPose[0:3,0:3] = np.eye(3)
+        return rtnPose
     else:
-        raise ValueError( f"`extract_pose_as_homog`: Poorly formed pose:\n{bgnPose}" )
-    if noRot:
-        rtnPose[0:3,0:3] = np.eye(3)
-    return rtnPose
+        return None
     
 
 def extract_position( obj_or_arr ):

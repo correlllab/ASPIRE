@@ -168,7 +168,8 @@ class Pick( GroundedAction ):
     def __init__( self, args, robot = None, name = None ):
 
         # ?label ?pose ?prevSupport ?idUp ?idDn
-        label, pose, prevSupport, idUp, idDn = args
+        # label, pose, prevSupport, idUp, idDn = args
+        label, pose, prevSupport = args
         
         if name is None:
             name = f"Pick {label} at {pose.pose} from {prevSupport}"
@@ -185,7 +186,8 @@ class Unstack( GroundedAction ):
     def __init__( self, args, robot = None, name = None ):
 
         # ?label ?pose ?prevSupport ?idUp ?idDn
-        label, pose, prevSupport, idUp, idDn = args
+        # label, pose, prevSupport, idUp, idDn = args
+        label, pose, prevSupport = args
         
         if name is None:
             name = f"Unstack {label} at {pose.pose} from {prevSupport}"
@@ -202,7 +204,8 @@ class MoveHolding( GroundedAction ):
     def __init__( self, args, robot = None, name = None ):
 
         # ?poseBgn ?poseEnd ?label
-        poseBgn, poseEnd, label, id_ = args
+        # poseBgn, poseEnd, label, id_ = args
+        poseBgn, poseEnd, label = args
 
         if name is None:
             name = f"Move Holding {label} --to-> {poseEnd}"
@@ -247,7 +250,8 @@ class Place( GroundedAction ):
     def __init__( self, args, robot = None, name = None ):
 
         # ?label ?pose ?support ?idUp ?idDn
-        label, pose, support, idUp, idDn = args
+        # label, pose, support, idUp, idDn = args
+        label, pose, support= args
         
         if name is None:
             name = f"Place {label} at {pose.pose} onto {support}"
@@ -271,7 +275,8 @@ class Stack( GroundedAction ):
     def __init__( self, args, robot = None, name = None ):
 
         # ?labelUp ?poseUp ?labelDn ?idUp ?idDn
-        labelUp, poseUp, labelDn, idUp, idDn = args
+        # labelUp, poseUp, labelDn, idUp, idDn = args
+        labelUp, poseUp, labelDn = args
         
         if name is None:
             name = f"Stack {labelUp} at {poseUp.pose} onto {labelDn}"

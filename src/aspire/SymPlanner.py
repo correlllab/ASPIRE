@@ -221,7 +221,7 @@ class SymPlanner:
                 unit_costs     = True, 
                 unit_efforts   = True, 
                 reorder        = False, # True
-                initial_complexity = 2,
+                initial_complexity = 3,
             )
 
             print( "Solver has completed!\n\n\n" )
