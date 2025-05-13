@@ -122,7 +122,7 @@ def set_robot_env():
     env_sto( "_MOVE_COOLDOWN_S" ,  0.5 )
     env_sto( "_BT_UPDATE_HZ"    ,  5.0 )
     env_sto( "_BT_ACT_TIMEOUT_S", 20.0 )
-    env_sto( "_ROBOT_PADDING_M" ,  0.250 )
+    env_sto( "_ROBOT_PADDING_M" ,  0.200 ) # 0.325
 
 
 

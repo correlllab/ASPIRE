@@ -14,7 +14,8 @@ from aspire.env_config import set_blocks_env, env_var, env_sto
 set_blocks_env()
 
 
-from aspire.symbols import ObjPose, extract_pose_as_homog, euclidean_distance_between_symbols
+from aspire.symbols import ( ObjPose, extract_pose_as_homog, euclidean_distance_between_symbols, 
+                             p_symbol_inside_workspace_bounds )
 from aspire.utils import diff_norm
 from aspire.SymPlanner import SymPlanner
 from aspire.actions.pdls_behaviors import Plan, MoveFree, Pick, MoveHolding, Place
@@ -120,7 +121,7 @@ class BlockFunctions:
                     if euclidean_distance_between_symbols( testPose, sym ) < ( env_var("_WIDE_PLACEMENT") ):
                         collide = True
                         break
-                if not collide:
+                if (not collide) and p_symbol_inside_workspace_bounds( testPose ):
                     placed = True
             yield (ObjPose(testPose),)
 
