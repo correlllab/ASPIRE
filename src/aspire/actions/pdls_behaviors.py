@@ -259,13 +259,15 @@ class Place( GroundedAction ):
 
 
         self.add_children([ 
-            Set_Gripper( env_var("_BLOCK_SCALE")*2.0, name = "Release Object", ctrl = robot ),
-            # Close_Gripper( ctrl = robot ),
-            # Gripper_Aperture_OK( 
-            #     env_var("_BLOCK_SCALE"), 
-            #     margin_m = env_var("_BLOCK_SCALE")*0.50, 
-            #     name = "Check Placed", ctrl = robot  
-            # ),
+            # Set_Gripper( env_var("_BLOCK_SCALE")*2.0, name = "Release Object", ctrl = robot ),
+            # Set_Gripper( env_var("_BLOCK_SCALE")*4.0, name = "Release Object", ctrl = robot ),
+            Open_Gripper( ctrl = robot ),
+            Close_Gripper( ctrl = robot ),
+            Gripper_Aperture_OK( 
+                env_var("_BLOCK_SCALE"), 
+                margin_m = env_var("_BLOCK_SCALE")*0.50, 
+                name = "Check Placed", ctrl = robot  
+            ),
             Open_Gripper( ctrl = robot ),
         ])
 
@@ -282,18 +284,15 @@ class Stack( GroundedAction ):
             name = f"Stack {labelUp} at {poseUp.pose} onto {labelDn}"
         super().__init__( args, robot, name )
 
-        # self.add_child( 
-        #     Open_Gripper( ctrl = robot  )
-        # )
-
         self.add_children([ 
-            Set_Gripper( env_var("_BLOCK_SCALE")*2.0, name = "Release Object", ctrl = robot ),
-            # Close_Gripper( ctrl = robot ),
-            # Gripper_Aperture_OK( 
-            #     env_var("_BLOCK_SCALE"), 
-            #     margin_m = env_var("_BLOCK_SCALE")*0.50, 
-            #     name = "Check Placed", ctrl = robot  
-            # ),
+            # Set_Gripper( env_var("_BLOCK_SCALE")*2.0, name = "Release Object", ctrl = robot ),
+            Open_Gripper( ctrl = robot ),
+            Close_Gripper( ctrl = robot ),
+            Gripper_Aperture_OK( 
+                env_var("_BLOCK_SCALE"), 
+                margin_m = env_var("_BLOCK_SCALE")*0.50, 
+                name = "Check Placed", ctrl = robot  
+            ),
             Open_Gripper( ctrl = robot ),
         ])
 

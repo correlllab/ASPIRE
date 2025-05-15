@@ -262,8 +262,9 @@ class BlockFunctions:
                 if euclidean_distance_between_symbols( spot, nuPose ) < ( env_var("_WIDE_XY_ACCEPT") ):
                     collide = True
                     break
-            if not collide:
-                freeSpots.append( ObjPose( nuPose ) )
+            nuSpot = ObjPose( nuPose )
+            if (not collide) and p_symbol_inside_workspace_bounds( nuSpot ):
+                freeSpots.append( nuSpot )
                 occuSpots.append( nuPose )
         for objPose in freeSpots:
             rtnFacts.extend([
