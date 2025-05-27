@@ -19,7 +19,7 @@ from aspire.env_config import env_var
 
 ########## HELPER FUNCTIONS ########################################################################
 
-def extract_np_array_pose( obj_or_arr ):
+def extract_np_array_pose( obj_or_arr ) -> np.ndarray:
     """ Return only a copy of the row vector representing the 3D pose """
     if isinstance( obj_or_arr, (list, np.ndarray,) ):
         return np.array( obj_or_arr )
@@ -31,7 +31,7 @@ def extract_np_array_pose( obj_or_arr ):
         return None
     
 
-def extract_pose_as_homog( obj_or_arr, noRot = False ):
+def extract_pose_as_homog( obj_or_arr, noRot = False ) -> np.ndarray:
     """ Return only a copy of the homogeneous coordinates of the 3D pose """
     bgnPose = extract_np_array_pose( obj_or_arr )
     if bgnPose is not None:
@@ -48,7 +48,7 @@ def extract_pose_as_homog( obj_or_arr, noRot = False ):
         return None
     
 
-def extract_position( obj_or_arr ):
+def extract_position( obj_or_arr ) -> np.ndarray:
     """ Return only a copy of the position vector of the 3D pose """
     pose = extract_pose_as_homog( obj_or_arr )
     return pose[0:3,3]
