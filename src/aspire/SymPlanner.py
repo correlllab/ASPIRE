@@ -175,8 +175,12 @@ class SymPlanner:
 
     
 
-    def check_goal_objects( self, goal, symbols : list[GraspObj] ):
+    def check_goal_objects( self, goal = None, symbols : list[GraspObj] = None ):
         """ Return True if the labels mentioned in the goals are a subset of the determinized symbols """
+        if goal is None:
+            goal = self.goal
+        if symbols is None:
+            symbols = self.symbols
         goalSet = set([])
         symbSet = set( [sym.label for sym in symbols] )
         for g in goal:
