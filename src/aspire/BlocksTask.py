@@ -94,7 +94,9 @@ class BlockFunctions:
                     upPose = extract_pose_as_homog( sym )
                     upPose[2,3] += (env_var("_BLOCK_SCALE") + env_var("_Z_STACK_BOOST"))
 
-                    rtnPose = self.planner.get_grounded_fact_pose_or_new( upPose )
+                    # rtnPose = self.planner.get_grounded_fact_pose_or_new( upPose )
+                    rtnPose = ObjPose( upPose )
+
                     print( f"FOUND a pose {rtnPose} supported by {objcName}!" )
 
                     yield (rtnPose,)
@@ -149,8 +151,9 @@ class BlockFunctions:
             print( f"Symbols: {self.planner.symbols}" )
 
             for sym in self.planner.symbols:
-                if euclidean_distance_between_symbols( chkPose, sym ) < ( env_var("_MIN_SEP") ):
-                    print( f"PLACEMENT test FAILURE\n" )
+                dist_i = euclidean_distance_between_symbols( chkPose, sym )
+                if dist_i < ( env_var("_MIN_SEP") ):
+                    print( f"PLACEMENT test FAILURE, OFFENDER: {sym}, {dist_i} < {env_var('_MIN_SEP')}\n" )
                     return False
             print( f"PLACEMENT test SUCCESS\n" )
             return True
@@ -305,6 +308,21 @@ class BlockFunctions:
                         factLst.append( ('Waypoint', goal[2],) )
                         if abs( extract_pose_as_homog(goal[2])[2,3] - env_var("_BLOCK_SCALE")) < env_var("_ACCEPT_POSN_ERR"):
                             factLst.append( ('PoseAbove', goal[2], 'table') )
+
+        def sweep_dupes( factLst : list ):
+            rtnLst = list()
+            posLst = list()
+            for fact in factLst:
+                if fact[0] == 'GraspObj':
+                    dMin = 1e9
+                    for pose in posLst:
+                        dMin = min( dMin, euclidean_distance_between_symbols( fact[2], pose ) ) 
+                    if dMin >= env_var("_BLOCK_SCALE"):
+                        posLst.append( extract_pose_as_homog( fact[2] ) )
+                        rtnLst.append( fact )
+                else:
+                    rtnLst.append( fact )
+            return rtnLst
             
         self.planner.facts = [ ('Base', 'table',), ] 
 
@@ -327,6 +345,8 @@ class BlockFunctions:
 
         ## Populate Spots for Block Movements ##, 2024-04-25: Injecting this for now, Try a stream later ...
         self.planner.facts.extend( self.allocate_table_swap_space( env_var("_N_XTRA_SPOTS") ) )
+
+        self.planner.facts = sweep_dupes( self.planner.facts )
 
         if env_var("_VERBOSE"):
             print( f"\n### Initial Symbols ###" )

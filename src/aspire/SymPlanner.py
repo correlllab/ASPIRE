@@ -138,8 +138,10 @@ class SymPlanner:
         """ If there is a `Waypoint` approx. to `homog`, then return it, Else create new `ObjPose` """ 
         for fact in self.facts:
             if fact[0] == 'Waypoint' and (euclidean_distance_between_symbols( homog, fact[1] ) <= env_var("_ACCEPT_POSN_ERR")):
+                print( f"{fact} match distance: {euclidean_distance_between_symbols( homog, fact[1] )}" )
                 return fact[1]
             if fact[0] == 'GraspObj' and (euclidean_distance_between_symbols( homog, fact[2] ) <= env_var("_ACCEPT_POSN_ERR")):
+                print( f"{fact} match distance: {euclidean_distance_between_symbols( homog, fact[2] )}" )
                 return fact[2]
         return ObjPose( homog )
     
@@ -276,9 +278,12 @@ class SymPlanner:
                     elif isinstance( pred[i], str ) and (pred[i] != fact[i]):
                         same = False
                         break
-                    elif isinstance( pred[i], ObjPose ) and (euclidean_distance_between_symbols( pred[i], fact[i] ) >= env_var("_ACCEPT_POSN_ERR")):
-                        same = False
-                        break
+                    elif isinstance( pred[i], ObjPose ):
+                        print( f"Distance b/n symbols: {euclidean_distance_between_symbols( pred[i], fact[i] )}" )
+                        if (euclidean_distance_between_symbols( pred[i], fact[i] ) > env_var("_ACCEPT_POSN_ERR")):
+                            same = False
+                        else:
+                            return True
                     # WARNING: THIS IS BAD, BUT UNSURE WHAT WILL BREAK IF I REMOVE IT
                     # elif (pred[i].index != fact[i].index):
                     #     same = False
@@ -301,14 +306,16 @@ class SymPlanner:
                 return union( goal[1:] ) 
             else:
                 print( f"Checking goal {goal}:", end=" " )
-                self.p_fact_match_noisy( goal )
+                return self.p_fact_match_noisy( goal )
 
         def intersecton( pList ):
             """ Return True only if ALL are True """
             for g in pList:
                 if not recur( g ):
-                    print( "SUBGOAL UNMET\n\n" )
+                    print( f"SUBGOAL UNMET: {g}\n\n" )
                     return False
+                else:
+                    print( f"MET: {g}\n" )
             print( "SUBGOAL MET\n\n" )
             return True
         
