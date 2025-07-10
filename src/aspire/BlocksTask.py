@@ -224,7 +224,7 @@ class BlockFunctions:
                     print( f"\nSupport Check: {xySep}, {(xySep <= env_var('_WIDE_XY_ACCEPT'))} and {zSep}, {( env_var('_WIDE_Z_ABOVE') >= zSep >= env_var('_ACCEPT_POSN_ERR'))}\n")
 
 
-                    if ((xySep <= env_var("_WIDE_XY_ACCEPT")) and ( env_var("_WIDE_Z_ABOVE") >= zSep >= env_var("_ACCEPT_POSN_ERR"))):
+                    if ((xySep <= env_var("_WIDE_XY_ACCEPT")) and ( env_var("_WIDE_Z_ABOVE") >= zSep >= env_var("_SMUSH_Z_ABOVE"))):
                         supDices.add(i)
                         rtnFacts.extend([
                             # ('Supported', lblUp, lblDn, idUp, idDn),
@@ -317,7 +317,7 @@ class BlockFunctions:
                     dMin = 1e9
                     for pose in posLst:
                         dMin = min( dMin, euclidean_distance_between_symbols( fact[2], pose ) ) 
-                    if dMin >= env_var("_BLOCK_SCALE")*0.80:
+                    if dMin >= env_var("_BLOCK_SCALE")*0.70:
                         posLst.append( extract_pose_as_homog( fact[2] ) )
                         rtnLst.append( fact )
                 else:
