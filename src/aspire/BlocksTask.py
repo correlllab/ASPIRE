@@ -312,14 +312,17 @@ class BlockFunctions:
         def sweep_dupes( factLst : list ):
             rtnLst = list()
             posLst = list()
+            dCrit  = env_var("_BLOCK_SCALE")*0.70
             for fact in factLst:
                 if fact[0] == 'GraspObj':
                     dMin = 1e9
                     for pose in posLst:
                         dMin = min( dMin, euclidean_distance_between_symbols( fact[2], pose ) ) 
-                    if dMin >= env_var("_BLOCK_SCALE")*0.70:
+                    if dMin >= dCrit:
                         posLst.append( extract_pose_as_homog( fact[2] ) )
                         rtnLst.append( fact )
+                    else:
+                        print( f"Symbol DESTROYED!: d = {dMin}<{dCrit}, {fact}" )
                 else:
                     rtnLst.append( fact )
             return rtnLst
