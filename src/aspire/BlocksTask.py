@@ -317,7 +317,9 @@ class BlockFunctions:
                 if fact[0] == 'GraspObj':
                     dMin = 1e9
                     for pose in posLst:
-                        dMin = min( dMin, euclidean_distance_between_symbols( fact[2], pose ) ) 
+                        d  = euclidean_distance_between_symbols( fact[2], pose )
+                        if d > 0.0:
+                            dMin = min( dMin, d ) 
                     if dMin >= dCrit:
                         posLst.append( extract_pose_as_homog( fact[2] ) )
                         rtnLst.append( fact )
@@ -349,7 +351,7 @@ class BlockFunctions:
         ## Populate Spots for Block Movements ##, 2024-04-25: Injecting this for now, Try a stream later ...
         self.planner.facts.extend( self.allocate_table_swap_space( env_var("_N_XTRA_SPOTS") ) )
 
-        self.planner.facts = sweep_dupes( self.planner.facts )
+        # self.planner.facts = sweep_dupes( self.planner.facts )
 
         if env_var("_VERBOSE"):
             print( f"\n### Initial Symbols ###" )
