@@ -59,8 +59,8 @@ def rand_table_pose():
     """ Return a random pose in the direct viscinity if the robot """
     rtnPose = np.eye(4)
     rtnPose[0:3,3] = [ 
-        env_var("_MIN_X_OFFSET") + 0.5*env_var("_X_WRK_SPAN") + 0.5*env_var("_X_WRK_SPAN")*random(), 
-        env_var("_MIN_Y_OFFSET") + 0.5*env_var("_Y_WRK_SPAN") + 0.5*env_var("_Y_WRK_SPAN")*random(), 
+        env_var("_MIN_X_OFFSET") + 0.25*env_var("_X_WRK_SPAN") + 0.5*env_var("_X_WRK_SPAN")*random(), 
+        env_var("_MIN_Y_OFFSET") + 0.25*env_var("_Y_WRK_SPAN") + 0.5*env_var("_Y_WRK_SPAN")*random(), 
         env_var("_BLOCK_SCALE")/2.0,
     ]
     return rtnPose
