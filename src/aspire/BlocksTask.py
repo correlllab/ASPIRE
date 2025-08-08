@@ -235,11 +235,16 @@ class BlockFunctions:
                         ])
         for i, sym_i in enumerate( self.planner.symbols ):
             if i not in supDices:
-                rtnFacts.extend( [
-                    # ('Supported', sym_i.label, 'table', sym_i.ident, 0 ),
-                    ('Supported', sym_i.label, 'table',),
-                    ('PoseAbove', self.planner.get_grounded_fact_pose_or_new( sym_i ), 'table',),
-                ] )
+                pose_i = extract_pose_as_homog( sym_i )
+                hght_i = pose_i[2,3]
+                if hght_i < env_var("_BLOCK_SCALE")*0.80:
+                    rtnFacts.extend( [
+                        # ('Supported', sym_i.label, 'table', sym_i.ident, 0 ),
+                        ('Supported', sym_i.label, 'table',),
+                        ('PoseAbove', self.planner.get_grounded_fact_pose_or_new( sym_i ), 'table',),
+                    ] )
+                else:
+                    print( f"FLOATING BLOCK: {sym_i}, {hght_i}" )
         ## Where the robot at? ##
         robotPose = ObjPose( robot.get_tcp_pose() )
         rtnFacts.extend([ 
