@@ -88,9 +88,11 @@ def set_object_env():
     # env_sto( "_BLOCK_SCALE", 0.025 ) # Medium Wooden Blocks (YCB)
     env_sto( "_BLOCK_SCALE", 0.040 ) # 3D Printed Blocks
 
-    env_sto( "_ACCEPT_POSN_ERR", 0.55*env_var( "_BLOCK_SCALE" ) ) # 0.50 # 0.65 # 0.75 # 0.85 # 1.00
-    env_sto( "_Z_SAFE", 0.400 )
-    env_sto( "_MIN_SEP", 0.85*env_var( "_BLOCK_SCALE" ) ) # 0.40 # 0.60 # 0.70 # 0.75
+    env_sto( "_ACCEPT_POSN_ERR"      , 0.55*env_var( "_BLOCK_SCALE" ) ) # 0.50 # 0.65 # 0.75 # 0.85 # 1.00
+    env_sto( "_Z_SAFE"               , 0.400 )
+    env_sto( "_MIN_SEP"              , 0.85*env_var( "_BLOCK_SCALE" ) ) # 0.40 # 0.60 # 0.70 # 0.75
+    env_sto( "_TABLE_SUPPORT_Z_MAX"  , 0.65*env_var("_BLOCK_SCALE") )
+    env_sto( "_DEFAULT_TABLE_SUPPORT", True )
 
 
 
