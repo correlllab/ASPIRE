@@ -53,7 +53,9 @@ def set_grahpics_env():
         'grn': [0.0, 1.0, 0.0,],
         'orn': [1.0, 0.5, 0.0,],
         'vio': [0.5, 0.0, 1.0,],
-        env_var("_NULL_NAME")[:3]: [1.0, 1.0, 1.0,],
+        'wht': [1.0, 1.0, 1.0,],
+        'blk': [0.0, 0.0, 0.0,],
+        env_var("_NULL_NAME")[:3]: [0.75, 0.75, 0.75,],
     } )
 
 
@@ -72,10 +74,12 @@ def set_object_env():
     env_sto( "_BLOCK_NAMES", [
         'redBlock', 
         # 'ylwBlock', 
-        'bluBlock', 
-        'grnBlock', 
+        # 'bluBlock', 
+        # 'grnBlock', 
         # 'ornBlock', 
         # 'vioBlock', 
+        'whtBlock', 
+        'blkBlock', 
         env_var("_NULL_NAME"),] )
         
 
