@@ -62,11 +62,14 @@ def p_symbol_inside_workspace_bounds( obj_or_arr ):
     return (pBox and pFar)
 
 
-def euclidean_distance_between_symbols( sym1, sym2 ):
+def euclidean_distance_between_symbols( sym1, sym2 ) -> float | None:
     """ Extract pose component from symbols and Return the linear distance between those poses """
     pose1 = extract_pose_as_homog( sym1 )
     pose2 = extract_pose_as_homog( sym2 )
-    return translation_diff( pose1, pose2 )
+    if (pose1 is not None) and (pose2 is not None):
+        return translation_diff( pose1, pose2 )
+    else:
+        return None
 
 
 
