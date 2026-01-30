@@ -54,11 +54,14 @@ def extract_position( obj_or_arr ) -> np.ndarray:
     return pose[0:3,3]
 
 
-def p_symbol_inside_workspace_bounds( obj_or_arr ):
+def p_symbol_inside_workspace_bounds( obj_or_arr, noPad = False, addMargin = 0.0 ):
     """ Return True if inside the bounding box, Otherwise return False """
     posn = extract_position( obj_or_arr )      
-    pBox = (env_var("_MIN_X_OFFSET") <= posn[0] <= env_var("_MAX_X_OFFSET")) and (env_var("_MIN_Y_OFFSET") <= posn[1] <= env_var("_MAX_Y_OFFSET")) and (-0.65*env_var("_BLOCK_SCALE") < posn[2] <= env_var("_MAX_Z_BOUND"))
-    pFar = np.linalg.norm( posn[:2] ) >= env_var("_ROBOT_PADDING_M")
+    pBox = (env_var("_MIN_X_OFFSET")-addMargin <= posn[0] <= env_var("_MAX_X_OFFSET")+addMargin) and (env_var("_MIN_Y_OFFSET")-addMargin <= posn[1] <= env_var("_MAX_Y_OFFSET")+addMargin) and (-0.65*env_var("_BLOCK_SCALE") < posn[2] <= env_var("_MAX_Z_BOUND"))
+    if noPad:
+        pFar = True
+    else:
+        pFar = np.linalg.norm( posn[:2] ) >= env_var("_ROBOT_PADDING_M")
     return (pBox and pFar)
 
 
