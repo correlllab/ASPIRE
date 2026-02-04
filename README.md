@@ -11,7 +11,7 @@
 1. `cd ASPIRE`
 1. `git submodule update --init --recursive`
 1. `python3.10 -m pip install -e . --user`
-1. `buildfd`
+1. `python3.10 __build__.py`
 
 
 # Dependencies
