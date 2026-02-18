@@ -265,7 +265,7 @@ class GraspObj:
             return f"<GraspObj {self.ident}:{self.index} @ {extract_position( self.pose )}, Class: {str(self.label)}, Prob: {self.prob:.4f}>"
     
 
-    def copy( self, copyParent = False ):
+    def copy( self, copyParent = False, thin = False ):
         """ Copy everything but the `parent` """
         ### Basic ###
         rtnObj = GraspObj()
@@ -284,8 +284,12 @@ class GraspObj:
         rtnObj.LKG    = self.LKG  
         rtnObj.SYM    = self.SYM  
         rtnObj.parent = None if (not copyParent) else self.parent 
-        rtnObj.cpcd   = self.cpcd.copy() 
-        rtnObj.meta   = deepcopy( self.meta )
+        if thin:
+            rtnObj.cpcd = None 
+            rtnObj.meta = None
+        else:
+            rtnObj.cpcd = self.cpcd.copy() 
+            rtnObj.meta = deepcopy( self.meta )
         ### Return ###
         return rtnObj
     
